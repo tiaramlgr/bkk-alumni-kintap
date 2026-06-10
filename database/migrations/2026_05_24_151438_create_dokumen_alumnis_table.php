@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('alumni_id')->constrained('alumnis')->onDelete('cascade');
             $table->foreignId('admin_id')->nullable()->constrained('users');
-            
             $table->enum('tipe_dokumen', ['skhu', 'ijazah', 'transkrip', 'sertifikat']);
             $table->string('nama_file');
             $table->string('path_file');

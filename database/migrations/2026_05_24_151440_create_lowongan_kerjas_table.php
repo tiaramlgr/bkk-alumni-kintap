@@ -23,6 +23,9 @@ return new class extends Migration
             $table->enum('status', ['aktif', 'tutup', 'draft'])->default('aktif');
             $table->boolean('siaran_wa')->default(false);
             
+            // INI YANG SEBELUMNYA KURANG:
+            $table->string('foto')->nullable(); 
+            
             $table->timestamps();
         });
     }

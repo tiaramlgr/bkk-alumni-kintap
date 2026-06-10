@@ -1,32 +1,41 @@
-@extends('layouts.app')
+@extends('layouts.alumni')
+
+@section('title', 'Lowongan Kerja')
 
 @section('content')
-<div class="p-8">
-    <h1 class="text-3xl font-bold mb-6">Lowongan Kerja Tersedia</h1>
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold">Lowongan Kerja Tersedia</h1>
+        <span class="text-sm text-gray-500">{{ $lowongans->total() }} lowongan aktif</span>
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @foreach($lowongans as $lowongan)
-        <div class="bg-white border rounded-3xl overflow-hidden hover:shadow-lg transition">
-            <div class="p-6">
-                <h3 class="font-semibold text-lg mb-2">{{ $lowongan->judul_lowongan }}</h3>
-                <p class="text-gray-600">{{ $lowongan->nama_perusahaan }}</p>
-                <p class="text-sm text-gray-500 mt-1">{{ $lowongan->lokasi }}</p>
-                
-                <div class="mt-4 text-sm">
-                    <span class="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-                        {{ $lowongan->tipe_pekerjaan }}
-                    </span>
-                </div>
-            </div>
-            <div class="border-t p-6 flex justify-between items-center">
-                <span class="text-sm text-gray-500">Deadline: {{ $lowongan->deadline }}</span>
+        @forelse($lowongans as $lowongan)
+        <div class="bg-white rounded-3xl shadow hover:shadow-xl transition-all p-6">
+            @if($lowongan->foto)
+                <img src="{{ asset('storage/' . $lowongan->foto) }}" 
+                     class="w-full h-48 object-cover rounded-2xl mb-4" alt="Foto Lowongan">
+            @endif
+
+            <h3 class="font-semibold text-lg line-clamp-2 mb-2">{{ $lowongan->judul_lowongan }}</h3>
+            <p class="text-gray-700 font-medium">{{ $lowongan->nama_perusahaan }}</p>
+            <p class="text-sm text-gray-500">{{ $lowongan->lokasi }} • {{ $lowongan->tipe_pekerjaan }}</p>
+
+            <div class="mt-6 flex justify-between items-center">
+                <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                    {{ $lowongan->kategori->nama_kategori ?? 'Umum' }}
+                </span>
                 <a href="{{ route('alumni.lowongan.show', $lowongan->id) }}" 
-                   class="bg-blue-600 text-white px-5 py-2.5 rounded-2xl text-sm hover:bg-blue-700">
-                    Lihat Detail
+                   class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                    Lihat Detail →
                 </a>
             </div>
         </div>
-        @endforeach
+        @empty
+        <div class="col-span-3 bg-white rounded-3xl p-12 text-center">
+            <p class="text-gray-500">Belum ada lowongan kerja aktif saat ini.</p>
+        </div>
+        @endforelse
     </div>
 </div>
 @endsection

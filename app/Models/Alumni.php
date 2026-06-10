@@ -36,7 +36,6 @@ class Alumni extends Model
         'is_subscribe_wa' => 'boolean',
     ];
 
-    // Relasi
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -50,5 +49,15 @@ class Alumni extends Model
     public function tracerStudy()
     {
         return $this->hasOne(TracerStudy::class);
+    }
+
+    public function dokumens()
+    {
+        return $this->hasMany(DokumenAlumni::class);
+    }
+
+    public function lamarans()
+    {
+        return $this->hasMany(Lamaran::class);
     }
 }

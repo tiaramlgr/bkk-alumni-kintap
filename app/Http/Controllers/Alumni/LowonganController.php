@@ -11,8 +11,8 @@ class LowonganController extends Controller
 {
     public function index()
     {
-        $lowongans = LowonganKerja::where('status', 'aktif')
-                    ->with('kategori')
+        $lowongans = LowonganKerja::with('kategori')
+                    ->where('status', 'aktif')
                     ->latest()
                     ->paginate(9);
 
@@ -29,23 +29,28 @@ class LowonganController extends Controller
     {
         $lowongan = LowonganKerja::findOrFail($id);
 
-        // Cek apakah sudah pernah melamar
-        $sudahMelamar = Lamaran::where('alumni_id', auth()->user()->alumni->id)
-                        ->where('lowongan_id', $id)
-                        ->exists();
-
-        if ($sudahMelamar) {
-            return back()->with('error', 'Anda sudah melamar lowongan ini.');
-        }
-
-        Lamaran::create([
-            'alumni_id' => auth()->user()->alumni->id,
-            'lowongan_id' => $id,
-            'status_lamaran' => 'pending',
-            'surat_lamaran' => $request->surat_lamaran,
+        $request->validate([
+            'surat_lamaran' => 'required|string|min:30',
+            'file_cv' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        return redirect()->route('alumni.dashboard')
-            ->with('success', 'Lamaran berhasil dikirim!');
+        $data = [
+            'alumni_id' => auth()->user()->alumni->id,
+            'lowongan_id' => $id,
+            'surat_lamaran' => $request->surat_lamaran,
+            'status_lamaran' => 'pending',
+        ];
+
+        if ($request->hasFile('file_cv')) {
+            $file = $request->file('file_cv');
+            $namaFile = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/cv', $namaFile);
+            $data['file_cv'] = 'cv/' . $namaFile;
+        }
+
+        Lamaran::create($data);
+
+        return redirect()->route('alumni.lowongan.index')
+            ->with('success', 'Lamaran berhasil dikirim! Silakan cek riwayat lamaran.');
     }
 }

@@ -23,10 +23,14 @@ class User extends Authenticatable
         'is_active' => 'boolean',
     ];
 
-    // Relasi
     public function alumni()
     {
         return $this->hasOne(Alumni::class);
+    }
+
+    public function company()
+    {
+        return $this->hasOne(Company::class, 'user_id');
     }
 
     public function activityLogs()
@@ -39,8 +43,9 @@ class User extends Authenticatable
         return $this->hasMany(OtpVerifikasi::class);
     }
 
-    // Helper Method
-    public function isAdmin()  { return $this->role === 'admin'; }
-    public function isAlumni() { return $this->role === 'alumni'; }
-    public function isSiswa()  { return $this->role === 'siswa'; }
+    // Helper Method Sinkronisasi Hak Akses Router
+    public function isAdmin()       { return $this->role === 'admin'; }
+    public function isAlumni()      { return $this->role === 'alumni'; }
+    public function isSiswa()       { return $this->role === 'siswa'; }
+    public function isPerusahaan()  { return $this->role === 'perusahaan'; }
 }

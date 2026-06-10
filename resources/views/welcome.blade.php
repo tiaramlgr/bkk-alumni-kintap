@@ -22,7 +22,10 @@
                 <a href="/login" class="font-medium">Masuk</a>
                 <a href="/register/step1" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl hover:bg-blue-700 transition">
                     Daftar Alumni
+                <a href="/perusahaan/login" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl hover:bg-blue-700 transition">
+                Daftar perusahaan
                 </a>
+
             </div>
         </div>
     </nav>

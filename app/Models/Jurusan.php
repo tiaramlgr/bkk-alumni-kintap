@@ -9,8 +9,21 @@ class Jurusan extends Model
 {
     use HasFactory;
 
-    protected $table = 'jurusans'; 
+    // Sesuaikan dengan kolom di bkk_alumni_kintap.sql
+    protected $fillable = [
+        'nama_kompetensi',
+        'nama_program',
+        'nama_bidang',
+        'kode_jurusan',
+        'is_active',
+    ];
 
-    // 2. Bebaskan semua proteksi kolom
-    protected $guarded = []; 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    public function alumnis()
+    {
+        return $this->hasMany(Alumni::class);
+    }
 }
