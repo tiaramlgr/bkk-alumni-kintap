@@ -51,94 +51,131 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between">
-            <div>
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                        <i class="fas fa-history text-slate-400"></i> Log Aktivitas Sistem
-                    </h3>
-                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">Real-time</span>
-                </div>
-                
-                <div class="space-y-4">
-                    @php
-                        // Mengambil log aktivitas sistem dari database proyek Anda
-                        $logs = \App\Models\ActivityLog::with('user')->latest()->take(4)->get();
-                    @endphp
-
-                    @forelse($logs as $log)
-                        <div class="flex items-start gap-3 text-sm pb-3 border-b border-slate-50 last:border-0 last:pb-0">
-                            <div class="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0"></div>
-                            <div class="flex-1">
-                                <p class="text-slate-700 font-medium"><span class="font-bold text-slate-900">{{ $log->user->name ?? 'Sistem' }}</span> {{ $log->action }}</p>
-                                <p class="text-xs text-slate-400 mt-0.5">{{ $log->created_at->diffForHumans() }}</p>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="text-center py-8 text-slate-400 text-sm">
-                            <i class="fas fa-info-circle text-2xl mb-2 block text-slate-200"></i>
-                            Belum ada log rekaman aktivitas terbaru di platform.
-                        </div>
-                    @endforelse
-                </div>
-            </div>
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+        <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+            <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
+                <i class="fas fa-chart-pie text-slate-400"></i> Ringkasan Status Serapan Kerja Alumni
+            </h3>
+            <a href="{{ route('admin.export.alumni') }}" class="text-sm font-semibold text-blue-600 hover:underline">Lihat Detail Laporan</a>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            @php
+                $totalTracer = \App\Models\TracerStudy::count() ?: 1;
+                $kerja = \App\Models\TracerStudy::where('status_aktivitas', 'bekerja')->count();
+                $usaha = \App\Models\TracerStudy::where('status_aktivitas', 'wirausaha')->count();
+                $kuliah = \App\Models\TracerStudy::where('status_aktivitas', 'kuliah')->count();
+                $belumTerserap = \App\Models\TracerStudy::whereIn('status_aktivitas', ['menganggur', 'lainnya'])->count();
+                
+                $pKerja = round(($kerja / $totalTracer) * 100);
+                $pUsaha = round(($usaha / $totalTracer) * 100);
+                $pKuliah = round(($kuliah / $totalTracer) * 100);
+                $pBelumTerserap = round(($belumTerserap / $totalTracer) * 100);
+            @endphp
+
             <div>
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                        <i class="fas fa-chart-pie text-slate-400"></i> Status Serapan Kerja Alumni
-                    </h3>
-                    <a href="{{ route('admin.export.alumni') }}" class="text-xs text-blue-600 hover:underline">Lihat Detail Laporan</a>
+                <div class="flex justify-between text-sm font-medium mb-2">
+                    <span class="text-slate-600 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Bekerja</span>
+                    <span class="font-bold text-slate-800">{{ $kerja }} Alumni ({{ $pKerja }}%)</span>
                 </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                    <div class="bg-emerald-500 h-full" style="width: {{ $pKerja }}%"></div>
+                </div>
+            </div>
 
-                <div class="space-y-4">
-                    @php
-                        // Kalkulasi persentase data kuesioner tracer study dari database proyek Anda
-                        $totalTracer = \App\Models\TracerStudy::count() ?: 1;
-                        $kerja = \App\Models\TracerStudy::where('status_aktivitas', 'bekerja')->count();
-                        $usaha = \App\Models\TracerStudy::where('status_aktivitas', 'wirausaha')->count();
-                        $kuliah = \App\Models\TracerStudy::where('status_aktivitas', 'kuliah')->count();
-                        
-                        $pKerja = round(($kerja / $totalTracer) * 100);
-                        $pUsaha = round(($usaha / $totalTracer) * 100);
-                        $pKuliah = round(($kuliah / $totalTracer) * 100);
-                    @endphp
+            <div>
+                <div class="flex justify-between text-sm font-medium mb-2">
+                    <span class="text-slate-600 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> Wirausaha</span>
+                    <span class="font-bold text-slate-800">{{ $usaha }} Alumni ({{ $pUsaha }}%)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                    <div class="bg-amber-500 h-full" style="width: {{ $pUsaha }}%"></div>
+                </div>
+            </div>
 
-                    <div>
-                        <div class="flex justify-between text-sm font-medium mb-1.5">
-                            <span class="text-slate-600 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Bekerja</span>
-                            <span class="font-bold text-slate-800">{{ $kerja }} Alumni ({{ $pKerja }}%)</span>
-                        </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-emerald-500 h-full" style="width: {{ $pKerja }}%"></div>
-                        </div>
-                    </div>
+            <div>
+                <div class="flex justify-between text-sm font-medium mb-2">
+                    <span class="text-slate-600 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span> Kuliah / Studi Lanjut</span>
+                    <span class="font-bold text-slate-800">{{ $kuliah }} Alumni ({{ $pKuliah }}%)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                    <div class="bg-blue-500 h-full" style="width: {{ $pKuliah }}%"></div>
+                </div>
+            </div>
 
-                    <div>
-                        <div class="flex justify-between text-sm font-medium mb-1.5">
-                            <span class="text-slate-600 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Wirausaha</span>
-                            <span class="font-bold text-slate-800">{{ $usaha }} Alumni ({{ $pUsaha }}%)</span>
-                        </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-amber-500 h-full" style="width: {{ $pUsaha }}%"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between text-sm font-medium mb-1.5">
-                            <span class="text-slate-600 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Kuliah / Studi Lanjut</span>
-                            <span class="font-bold text-slate-800">{{ $kuliah }} Alumni ({{ $pKuliah }}%)</span>
-                        </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-blue-500 h-full" style="width: {{ $pKuliah }}%"></div>
-                        </div>
-                    </div>
+            <div>
+                <div class="flex justify-between text-sm font-medium mb-2">
+                    <span class="text-slate-600 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500"></span> Mencari Kerja / Lainnya</span>
+                    <span class="font-bold text-slate-800">{{ $belumTerserap }} Alumni ({{ $pBelumTerserap }}%)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                    <div class="bg-rose-500 h-full" style="width: {{ $pBelumTerserap }}%"></div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-blue-500"></i> Statistik Karir Lulusan per Jurusan (Tahun Laporan: {{ date('Y') }})
+            </h3>
+        </div>
+        
+        <div class="relative h-96 w-full">
+            <canvas id="jurusanChart"></canvas>
+        </div>
+    </div>
+
+    @php
+        $tahunIni = date('Y');
+        $jurusans = \App\Models\Jurusan::all();
+        $labels = [];
+        $dataBekerja = [];
+        $dataWirausaha = [];
+        $dataKuliah = [];
+        $dataMencari = [];
+
+        foreach($jurusans as $jurusan) {
+            $labels[] = $jurusan->kode_jurusan; 
+            $tracers = \App\Models\TracerStudy::where('tahun_pengisian', $tahunIni)
+                ->whereHas('alumni', function($q) use ($jurusan) {
+                    $q->where('jurusan_id', $jurusan->id);
+                })->get();
+
+            $dataBekerja[] = $tracers->where('status_aktivitas', 'bekerja')->count();
+            $dataWirausaha[] = $tracers->where('status_aktivitas', 'wirausaha')->count();
+            $dataKuliah[] = $tracers->where('status_aktivitas', 'kuliah')->count();
+            $dataMencari[] = $tracers->whereIn('status_aktivitas', ['menganggur', 'lainnya'])->count();
+        }
+    @endphp
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('jurusanChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($labels) !!},
+                    datasets: [
+                        { label: 'Bekerja', data: {!! json_encode($dataBekerja) !!}, backgroundColor: '#10b981', borderRadius: 6 },
+                        { label: 'Wirausaha', data: {!! json_encode($dataWirausaha) !!}, backgroundColor: '#f59e0b', borderRadius: 6 },
+                        { label: 'Kuliah', data: {!! json_encode($dataKuliah) !!}, backgroundColor: '#3b82f6', borderRadius: 6 },
+                        { label: 'Mencari Kerja', data: {!! json_encode($dataMencari) !!}, backgroundColor: '#f43f5e', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        x: { stacked: false },
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        });
+    </script>
 </div>
 @endsection

@@ -9,27 +9,29 @@ class TracerStudy extends Model
 {
     use HasFactory;
 
+    protected $table = 'tracer_studies';
+
+    // WAJIB: Pastikan semua kolom ini sama persis dengan yang ada di database Anda
     protected $fillable = [
         'alumni_id',
         'tahun_pengisian',
         'status_aktivitas',
-        'keterangan_status',
-        'masa_tunggu_bulan',
-        'jabatan',
         'nama_instansi',
+        'jabatan',
         'kota_kerja',
-        'negara_kerja',
+        'masa_tunggu_bulan',
         'keselarasan_kerja',
+        'pendapatan_ump',
+        'nama_produk_usaha',
         'bidang_usaha',
         'kota_usaha',
         'keselarasan_usaha',
-        'nama_produk_usaha',
-        'pendapatan_ump',
-        'pendapatan_umk',
+        'keterangan_status',
+        'negara_kerja',
     ];
 
     public function alumni()
     {
-        return $this->belongsTo(Alumni::class);
+        return $this->belongsTo(Alumni::class, 'alumni_id');
     }
 }

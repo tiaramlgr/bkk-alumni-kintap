@@ -16,20 +16,14 @@ class DokumenAlumni extends Model
         'nama_file',
         'path_file',
         'tahun_dokumen',
-        'is_active',
+        'is_active', // Ini untuk Admin
+        'status_verifikasi', // Baru: 'pending', 'approved', 'rejected'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
     ];
 
-    public function alumni()
-    {
-        return $this->belongsTo(Alumni::class);
-    }
-
-    public function admin()
-    {
-        return $this->belongsTo(User::class, 'admin_id');
-    }
+    public function alumni() { return $this->belongsTo(Alumni::class); }
+    public function admin() { return $this->belongsTo(User::class, 'admin_id'); }
 }

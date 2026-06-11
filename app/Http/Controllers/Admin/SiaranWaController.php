@@ -11,10 +11,6 @@ use Illuminate\Support\Facades\Log;
 
 class SiaranWaController extends Controller
 {
-    /**
-     * Base URL WhatsApp Gateway (Fonnte / WA-Gateway / dll).
-     * Set via .env: WA_GATEWAY_URL, WA_GATEWAY_TOKEN
-     */
     private string $gatewayUrl;
     private string $gatewayToken;
 
@@ -24,18 +20,18 @@ class SiaranWaController extends Controller
         $this->gatewayToken = config('services.whatsapp.token', env('WA_GATEWAY_TOKEN', ''));
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  INDEX                                                               */
-    /* ------------------------------------------------------------------ */
     public function index()
-    {
-        $siarans = SiaranWa::with('admin')->latest()->paginate(10);
-        return view('admin.siaran.index', compact('siarans'));
+        {
+        try {
+            $siarans = SiaranWa::latest()->paginate(10); 
+            
+            return view('admin.siaran.index', compact('siarans'));
+            
+        } catch (\Throwable $th) {
+            dd('ERROR HALAMAN SIARAN:', $th->getMessage(), 'BARIS:', $th->getLine());
+        }
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  CREATE                                                              */
-    /* ------------------------------------------------------------------ */
     public function create()
     {
         $totalSubscriber = Alumni::where('status_akun', 'approved')
@@ -44,103 +40,48 @@ class SiaranWaController extends Controller
         return view('admin.siaran.create', compact('totalSubscriber'));
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  STORE (draft saja, belum kirim)                                    */
-    /* ------------------------------------------------------------------ */
     public function store(Request $request)
     {
-        $request->validate([
-            'judul_siaran'    => 'required|string|max:255',
-            'template_pesan'  => 'required|string',
-        ]);
-
-        $penerima = Alumni::where('status_akun', 'approved')
-                          ->where('is_subscribe_wa', true)
-                          ->get();
-
-        $siaran = SiaranWa::create([
-            'admin_id'       => auth()->id(),
-            'judul_siaran'   => $request->judul_siaran,
-            'jenis_siaran'   => 'manual',
-            'template_pesan' => $request->template_pesan,
-            'total_penerima' => $penerima->count(),
-            'status_batch'   => 'draft',
-        ]);
-
-        return redirect()->route('admin.siaran.show', $siaran->id)
-                         ->with('success', 'Siaran berhasil dibuat sebagai draft. Klik "Kirim Sekarang" untuk mengirim.');
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  SHOW                                                                */
-    /* ------------------------------------------------------------------ */
-    public function show($id)
-    {
-        $siaran = SiaranWa::with('admin')->findOrFail($id);
-        return view('admin.siaran.show', compact('siaran'));
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  EDIT                                                                */
-    /* ------------------------------------------------------------------ */
-    public function edit($id)
-    {
-        $siaran = SiaranWa::findOrFail($id);
-
-        if ($siaran->status_batch !== 'draft') {
-            return redirect()->route('admin.siaran.index')
-                             ->with('error', 'Siaran yang sudah dikirim tidak dapat diedit.');
-        }
-
-        return view('admin.siaran.edit', compact('siaran'));
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  UPDATE                                                              */
-    /* ------------------------------------------------------------------ */
-    public function update(Request $request, $id)
-    {
-        $siaran = SiaranWa::findOrFail($id);
-
-        if ($siaran->status_batch !== 'draft') {
-            return redirect()->route('admin.siaran.index')
-                             ->with('error', 'Siaran yang sudah dikirim tidak dapat diedit.');
-        }
-
         $request->validate([
             'judul_siaran'   => 'required|string|max:255',
             'template_pesan' => 'required|string',
         ]);
 
-        $penerima = Alumni::where('status_akun', 'approved')
-                          ->where('is_subscribe_wa', true)
-                          ->count();
+        try {
+            $penerima = Alumni::where('status_akun', 'approved')
+                              ->where('is_subscribe_wa', true)
+                              ->get();
 
-        $siaran->update([
-            'judul_siaran'   => $request->judul_siaran,
-            'template_pesan' => $request->template_pesan,
-            'total_penerima' => $penerima,
-        ]);
+            $siaran = SiaranWa::create([
+                'admin_id'       => auth()->id(),
+                'judul_siaran'   => $request->judul_siaran,
+                'jenis_siaran'   => 'manual',
+                'template_pesan' => $request->template_pesan,
+                'total_penerima' => $penerima->count(),
+                'status_batch'   => 'draft',
+            ]);
 
-        return redirect()->route('admin.siaran.show', $siaran->id)
-                         ->with('success', 'Siaran berhasil diperbarui!');
+            return redirect()->route('admin.siaran.index')
+                             ->with('success', 'Siaran berhasil dibuat sebagai draft. Klik ikon Kirim di tabel untuk menyebarkan.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memproses draft siaran: ' . $e->getMessage());
+        }
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  DESTROY                                                             */
-    /* ------------------------------------------------------------------ */
+    public function show($id)
+    {
+        $siaran = SiaranWa::findOrFail($id);
+        return view('admin.siaran.show', compact('siaran'));
+    }
+
     public function destroy($id)
     {
         $siaran = SiaranWa::findOrFail($id);
         $siaran->delete();
 
-        return redirect()->route('admin.siaran.index')
-                         ->with('success', 'Siaran berhasil dihapus!');
+        return redirect()->route('admin.siaran.index')->with('success', 'Data siaran berhasil dihapus!');
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  SEND — kirim ke WhatsApp Gateway                                   */
-    /* ------------------------------------------------------------------ */
     public function send($id)
     {
         $siaran = SiaranWa::findOrFail($id);
@@ -150,16 +91,15 @@ class SiaranWaController extends Controller
                              ->with('error', 'Siaran ini sudah pernah dikirim.');
         }
 
-        // Ambil alumni yang subscribe WA dan sudah approved
-        $alumnis = Alumni::with('user')
+        // Ambil alumni berserta relasi jurusan untuk merender variabel {jurusan}
+        $alumnis = Alumni::with(['user', 'jurusan'])
                          ->where('status_akun', 'approved')
                          ->where('is_subscribe_wa', true)
                          ->whereNotNull('no_hp_wa')
                          ->get();
 
         if ($alumnis->isEmpty()) {
-            return redirect()->back()
-                             ->with('error', 'Tidak ada alumni subscriber WhatsApp yang aktif.');
+            return redirect()->back()->with('error', 'Tidak ada alumni subscriber WhatsApp yang aktif.');
         }
 
         $siaran->update([
@@ -192,25 +132,22 @@ class SiaranWaController extends Controller
             'meta'           => json_encode([
                 'berhasil' => $berhasil,
                 'gagal'    => $gagal,
-                'errors'   => array_slice($errors, 0, 10), // simpan max 10 error
+                'errors'   => array_slice($errors, 0, 10),
             ]),
         ]);
 
-        $msg = "Siaran berhasil dikirim ke {$berhasil} alumni.";
+        $msg = "Siaran berhasil diproses! Terkirim ke {$berhasil} alumni.";
         if ($gagal > 0) {
-            $msg .= " {$gagal} gagal dikirim.";
+            $msg .= " Namun, {$gagal} gagal dikirim.";
         }
 
         return redirect()->route('admin.siaran.index')->with('success', $msg);
     }
 
     /* ------------------------------------------------------------------ */
-    /*  PRIVATE HELPERS                                                     */
+    /* PRIVATE HELPERS                                                   */
     /* ------------------------------------------------------------------ */
 
-    /**
-     * Format nomor HP ke format internasional (62xxx).
-     */
     private function formatNomor(string $nomor): string
     {
         $nomor = preg_replace('/\D/', '', $nomor);
@@ -224,42 +161,29 @@ class SiaranWaController extends Controller
         return $nomor;
     }
 
-    /**
-     * Ganti placeholder di template pesan dengan data alumni.
-     * Placeholder: {nama}, {nisn}, {jurusan}, {tahun_lulus}
-     */
     private function renderPesan(string $template, Alumni $alumni): string
     {
+        // BUG FIX: Menggunakan nama_kompetensi karena itu struktur tabel Anda
         return str_replace(
             ['{nama}', '{nisn}', '{jurusan}', '{tahun_lulus}'],
             [
                 $alumni->user->name ?? '-',
                 $alumni->nisn ?? '-',
-                $alumni->jurusan->nama_jurusan ?? '-',
+                $alumni->jurusan->nama_kompetensi ?? '-', 
                 $alumni->tahun_lulus ?? '-',
             ],
             $template
         );
     }
 
-    /**
-     * Kirim pesan ke WhatsApp Gateway (Fonnte).
-     * Fonnte API: POST https://api.fonnte.com/send
-     * Header: Authorization: <token>
-     * Body: target, message, countryCode
-     *
-     * Ganti implementasi ini sesuai provider gateway Anda.
-     */
     private function kirimWa(string $nomor, string $pesan): array
     {
         if (empty($this->gatewayUrl) || empty($this->gatewayToken)) {
-            // Fallback: log saja kalau belum dikonfigurasi
             Log::info('WA Gateway belum dikonfigurasi. Simulasi kirim ke: ' . $nomor);
             return ['success' => true, 'message' => 'Simulasi (gateway belum dikonfigurasi)'];
         }
 
         try {
-            // ---- Fonnte ----
             if (str_contains($this->gatewayUrl, 'fonnte.com')) {
                 $response = Http::withHeaders([
                     'Authorization' => $this->gatewayToken,
@@ -277,7 +201,6 @@ class SiaranWaController extends Controller
                 return ['success' => false, 'message' => $body['reason'] ?? 'Unknown error'];
             }
 
-            // ---- Generic JSON Gateway (WA-Gateway / whacenter / dll) ----
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->gatewayToken,
                 'Content-Type'  => 'application/json',

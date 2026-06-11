@@ -24,6 +24,7 @@ class Alumni extends Model
         'provinsi_domisili',
         'kota_domisili',
         'no_hp_wa',
+        'status_akun',
         'is_subscribe_wa',
         'sertifikat_kompetensi',
         'foto',
@@ -36,6 +37,7 @@ class Alumni extends Model
         'is_subscribe_wa' => 'boolean',
     ];
 
+    
     public function user()
     {
         return $this->belongsTo(User::class);

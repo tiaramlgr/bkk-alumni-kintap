@@ -12,49 +12,17 @@ class DokumenController extends Controller
     {
         $user = auth()->user();
 
-        // DEBUG: Cek apakah user punya relasi alumni
         if (!$user->alumni) {
             return redirect()->route('alumni.dashboard')
-                ->with('error', 'Profil alumni Anda belum ditemukan. Silakan hubungi Admin untuk verifikasi.');
+                ->with('error', 'Profil alumni tidak valid.');
         }
 
+        // Ambil dokumen yang diunggah Admin untuk alumni ini, dan berstatus aktif
         $dokumens = DokumenAlumni::where('alumni_id', $user->alumni->id)
+                    ->where('is_active', true)
                     ->latest()
                     ->get();
 
         return view('alumni.dokumen.index', compact('dokumens'));
-    }
-
-    // store method tetap sama
-    public function store(Request $request)
-    {
-        $user = auth()->user();
-
-        if (!$user->alumni) {
-            return redirect()->route('alumni.dashboard')
-                ->with('error', 'Profil alumni belum lengkap.');
-        }
-
-        $request->validate([
-            'tipe_dokumen' => 'required|in:skhu,ijazah,transkrip,sertifikat',
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-        ]);
-
-        $file = $request->file('file');
-        $namaFile = time() . '_' . $file->getClientOriginalName();
-
-        $file->storeAs('public/dokumen', $namaFile);
-
-        DokumenAlumni::create([
-            'alumni_id' => $user->alumni->id,
-            'tipe_dokumen' => $request->tipe_dokumen,
-            'nama_file' => $file->getClientOriginalName(),
-            'path_file' => 'dokumen/' . $namaFile,
-            'tahun_dokumen' => date('Y'),
-            'is_active' => false,
-        ]);
-
-        return redirect()->route('alumni.dokumen.index')
-            ->with('success', 'Dokumen berhasil diupload!');
     }
 }

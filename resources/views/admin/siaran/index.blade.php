@@ -3,44 +3,87 @@
 @section('title', 'Siaran WhatsApp')
 
 @section('content')
-<div class="flex justify-between items-center mb-8">
-    <h1 class="text-3xl font-bold">Siaran WhatsApp</h1>
-    <a href="{{ route('admin.siaran.create') }}" class="bg-green-600 text-white px-6 py-3 rounded-2xl hover:bg-green-700">
-        + Buat Siaran Baru
-    </a>
-</div>
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font bold text-slate-800">Siaran WhatsApp</h1>
+            <p class="text-sm text-slate-500 mt-1">Kirim pesan massal (broadcast) ke seluruh alumni.</p>
+        </div>
+        
+        <a href="{{ route('admin.siaran.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-semibold flex items-center gap-2 transition shadow-lg">
+            <i class="fas fa-plus"></i> Buat Siaran Baru
+        </a>
+    </div>
 
-<div class="bg-white rounded-3xl shadow overflow-hidden">
-    <table class="w-full">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="px-6 py-4 text-left">Judul Siaran</th>
-                <th class="px-6 py-4 text-left">Jenis</th>
-                <th class="px-6 py-4 text-left">Tanggal</th>
-                <th class="px-6 py-4 text-center">Penerima</th>
-                <th class="px-6 py-4 text-center">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($siarans as $siaran)
-            <tr class="border-t hover:bg-gray-50">
-                <td class="px-6 py-4 font-medium">{{ $siaran->judul_siaran }}</td>
-                <td class="px-6 py-4">{{ ucfirst($siaran->jenis_siaran) }}</td>
-                <td class="px-6 py-4">{{ $siaran->created_at->format('d M Y H:i') }}</td>
-                <td class="px-6 py-4 text-center">{{ $siaran->total_penerima }}</td>
-                <td class="px-6 py-4 text-center">
-                    <span class="px-4 py-1 rounded-full text-sm 
-                        {{ $siaran->status_batch == 'selesai' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                        {{ ucfirst($siaran->status_batch) }}
-                    </span>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="5" class="px-6 py-12 text-center text-gray-500">Belum ada siaran WhatsApp.</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+    @if(session('success'))
+        <div class="bg-emerald-100 border border-emerald-400 text-emerald-800 px-4 py-3 rounded-2xl font-medium">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="bg-rose-100 border border-rose-400 text-rose-800 px-4 py-3 rounded-2xl font-medium">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+        <table class="w-full border-collapse">
+            <thead class="bg-slate-50 border-b border-slate-100 text-slate-600 text-sm font-semibold">
+                <tr>
+                    <th class="px-6 py-4 text-left">Judul Siaran</th>
+                    <th class="px-6 py-4 text-left">Tanggal Dibuat</th>
+                    <th class="px-6 py-4 text-center">Penerima</th>
+                    <th class="px-6 py-4 text-center">Status</th>
+                    <th class="px-6 py-4 text-center w-40">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700 text-sm">
+                @forelse($siarans as $siaran)
+                <tr class="hover:bg-slate-50/80 transition">
+                    <td class="px-6 py-4 font-bold text-slate-900">{{ $siaran->judul_siaran }}</td>
+                    <td class="px-6 py-4 text-slate-500">{{ $siaran->created_at->format('d M Y, H:i') }}</td>
+                    <td class="px-6 py-4 text-center font-mono font-medium text-slate-600">{{ $siaran->total_penerima }}</td>
+                    <td class="px-6 py-4 text-center">
+                        @if($siaran->status_batch == 'selesai')
+                            <span class="bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold uppercase">Selesai</span>
+                        @elseif($siaran->status_batch == 'proses')
+                            <span class="bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold uppercase">Proses</span>
+                        @else
+                            <span class="bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1 rounded-full text-xs font-bold uppercase">Draft</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex items-center justify-center space-x-3">
+                            @if($siaran->status_batch == 'draft')
+                            <form action="{{ route('admin.siaran.send', $siaran->id) }}" method="POST" class="inline" onsubmit="return confirm('Kirim broadcast ini ke semua alumni sekarang?')">
+                                @csrf
+                                <button type="submit" class="bg-blue-600 text-white w-8 h-8 rounded-full hover:bg-blue-700 transition" title="Kirim Sekarang">
+                                    <i class="fas fa-paper-plane text-xs"></i>
+                                </button>
+                            </form>
+                            @endif
+
+                            <form action="{{ route('admin.siaran.send', $siaran->id) }}" method="POST" class="inline" onsubmit="return confirm('Kirim broadcast?')">
+                                @csrf
+                                <button type="submit" class="bg-blue-600 text-white w-8 h-8 rounded-full hover:bg-blue-700 transition" title="Kirim Sekarang">
+                                    <i class="fas fa-paper-plane text-xs"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-slate-400">Belum ada riwayat siaran WhatsApp.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+        @if($siarans->hasPages())
+        <div class="p-6 bg-slate-50 border-t border-slate-100">
+            {{ $siarans->links() }}
+        </div>
+        @endif
+    </div>
 </div>
 @endsection

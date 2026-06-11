@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LowonganKerja;
 use App\Models\KategoriLowongan;
 use App\Models\Lamaran;
+use App\Services\WhatsappService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,7 +14,9 @@ class LowonganController extends Controller
 {
     public function index()
     {
-        $lowongans = LowonganKerja::with('kategori')->latest()->get();
+        // Mengambil SEMUA lowongan dari seluruh pembuat (Admin & Semua Perusahaan)
+        $lowongans = LowonganKerja::with('admin', 'kategori')->latest()->get();
+        
         return view('admin.lowongan.index', compact('lowongans'));
     }
 
@@ -46,19 +49,25 @@ class LowonganController extends Controller
         $data['status'] = 'aktif';
         $data['siaran_wa'] = $request->has('siaran_wa');
 
-        // Perbaikan Upload Foto
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
-            // Menghilangkan spasi pada nama file agar aman di database
             $namaFoto = time() . '_' . str_replace(' ', '_', $foto->getClientOriginalName());
             $foto->storeAs('public/lowongan', $namaFoto);
             $data['foto'] = 'lowongan/' . $namaFoto;
         }
 
-        LowonganKerja::create($data);
+        // Tampung data yang baru dibuat ke dalam variabel $lowongan
+        $lowongan = LowonganKerja::create($data);
+
+        // OTOMATISASI WA: Jika checkbox siaran WA dicentang, kirim broadcast
+        if ($lowongan->siaran_wa) {
+            WhatsappService::broadcastLowonganBaru($lowongan);
+            return redirect()->route('admin.lowongan.index')
+                             ->with('success', 'Lowongan berhasil dibuat & Siaran WA berhasil dikirim ke Alumni!');
+        }
 
         return redirect()->route('admin.lowongan.index')
-                         ->with('success', 'Lowongan berhasil dibuat!');
+                         ->with('success', 'Lowongan berhasil dibuat tanpa siaran WA.');
     }
 
     public function edit($id)
@@ -89,7 +98,6 @@ class LowonganController extends Controller
         ]);
         $data['siaran_wa'] = $request->has('siaran_wa');
 
-        // Perbaikan Upload Foto Edit
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
             $namaFoto = time() . '_' . str_replace(' ', '_', $foto->getClientOriginalName());
@@ -136,11 +144,19 @@ class LowonganController extends Controller
             'catatan_admin'  => 'nullable|string'
         ]);
 
-        $lamaran = Lamaran::findOrFail($id);
+        // Eager load lowongan agar nama perusahaan/posisi bisa dibaca oleh pesan WA
+        $lamaran = Lamaran::with('lowongan')->findOrFail($id);
+        
         $lamaran->update([
             'status_lamaran' => $request->status_lamaran,
             'catatan_admin'  => $request->catatan_admin
         ]);
+
+        // OTOMATISASI WA: Jika status diubah menjadi "diterima", kirim notifikasi pribadi
+        if ($request->status_lamaran === 'diterima') {
+            WhatsappService::notifikasiPelamarDiterima($lamaran);
+            return redirect()->back()->with('success', 'Status lamaran diterima dan Notifikasi WA telah dikirim ke pelamar.');
+        }
 
         return redirect()->back()->with('success', 'Status lamaran alumni berhasil diperbarui.');
     }

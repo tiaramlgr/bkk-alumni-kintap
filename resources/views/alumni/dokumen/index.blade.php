@@ -1,62 +1,42 @@
 @extends('layouts.alumni')
 
-@section('title', 'Dokumen Saya')
+@section('title', 'Berkas Resmi')
 
 @section('content')
-<div class="max-w-5xl mx-auto">
-    <h1 class="text-3xl font-bold mb-8">Dokumen Saya</h1>
-
-    <!-- Upload Form -->
-    <div class="bg-white p-8 rounded-3xl shadow mb-10">
-        <h2 class="text-xl font-semibold mb-6">Upload Dokumen Baru</h2>
-        <form action="{{ route('alumni.dokumen.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium mb-2">Jenis Dokumen</label>
-                    <select name="tipe_dokumen" required class="w-full px-4 py-3 border rounded-2xl">
-                        <option value="skhu">SKHU</option>
-                        <option value="ijazah">Ijazah</option>
-                        <option value="transkrip">Transkrip Nilai</option>
-                        <option value="sertifikat">Sertifikat Kompetensi</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-2">Pilih File</label>
-                    <input type="file" name="file" required class="w-full px-4 py-3 border rounded-2xl">
-                </div>
-            </div>
-            <button type="submit" class="mt-6 w-full bg-blue-600 text-white py-4 rounded-2xl font-semibold hover:bg-blue-700">
-                Upload Dokumen
-            </button>
-        </form>
+<div class="max-w-5xl mx-auto space-y-6">
+    <div class="mb-8 border-b border-slate-100 pb-4">
+        <h1 class="text-3xl font-bold text-slate-900">Berkas Resmi Saya</h1>
+        <p class="text-sm text-slate-500 mt-1">Arsip dokumen SKHU/Ijazah yang diterbitkan oleh Admin/Pihak Sekolah.</p>
     </div>
 
-    <!-- Daftar Dokumen -->
-    <h2 class="text-xl font-semibold mb-4">Daftar Dokumen</h2>
-    <div class="bg-white rounded-3xl shadow overflow-hidden">
-        <table class="w-full">
-            <thead class="bg-gray-100">
+    <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+        <table class="w-full border-collapse">
+            <thead class="bg-slate-50 border-b border-slate-100 text-slate-600 text-sm font-semibold">
                 <tr>
+                    <th class="px-6 py-4 text-left w-16">No</th>
                     <th class="px-6 py-4 text-left">Jenis Dokumen</th>
                     <th class="px-6 py-4 text-left">Nama File</th>
-                    <th class="px-6 py-4 text-left">Tanggal Upload</th>
-                    <th class="px-6 py-4 text-center">Status</th>
+                    <th class="px-6 py-4 text-center">Tahun</th>
+                    <th class="px-6 py-4 text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($dokumens as $dokumen)
-                <tr class="border-t">
-                    <td class="px-6 py-4 font-medium">{{ strtoupper($dokumen->tipe_dokumen) }}</td>
-                    <td class="px-6 py-4">{{ $dokumen->nama_file }}</td>
-                    <td class="px-6 py-4">{{ $dokumen->created_at->format('d M Y') }}</td>
+            <tbody class="divide-y divide-slate-100 text-slate-700 text-sm">
+                @forelse($dokumens as $index => $dokumen)
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-medium text-center">{{ $index + 1 }}</td>
+                    <td class="px-6 py-4 font-bold text-slate-900 uppercase">{{ $dokumen->tipe_dokumen }}</td>
+                    <td class="px-6 py-4 text-slate-600">{{ $dokumen->nama_file }}</td>
+                    <td class="px-6 py-4 text-center">{{ $dokumen->tahun_dokumen }}</td>
                     <td class="px-6 py-4 text-center">
-                        <span class="bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm">Terverifikasi</span>
+                        <a href="{{ asset('storage/' . $dokumen->path_file) }}" download="{{ $dokumen->nama_file }}" class="bg-blue-100 text-blue-700 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 w-max mx-auto">
+                            <i class="fas fa-download"></i> Unduh
+                        </a>
                     </td>
-                </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="px-6 py-12 text-center text-gray-500">Belum ada dokumen yang diupload.</td>
+                    <td colspan="5" class="px-6 py-16 text-center text-slate-500">
+                        Admin belum mengunggah dokumen apapun untuk Anda.
+                    </td>
                 </tr>
                 @endforelse
             </tbody>

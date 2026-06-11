@@ -18,11 +18,11 @@
                 
                 <nav class="p-4 space-y-1">
                     <a href="{{ route('alumni.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('alumni.dashboard') ? 'bg-blue-50 text-blue-700 font-bold shadow-sm shadow-blue-500/5' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <i class="fas fa-home w-5 text-center text-base"></i> Dashboard Beranda
+                        <i class="fas fa-home w-5 text-center text-base"></i> Dashboard
                     </a>
                     
                     <a href="{{ route('alumni.tracer.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('alumni.tracer.*') ? 'bg-blue-50 text-blue-700 font-bold shadow-sm shadow-blue-500/5' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <i class="fas fa-paste w-5 text-center text-base"></i> Kuesioner Tracer
+                        <i class="fas fa-paste w-5 text-center text-base"></i>  Tracer Study
                     </a>
                     
                     <a href="{{ route('alumni.lowongan.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('alumni.lowongan.*') ? 'bg-blue-50 text-blue-700 font-bold shadow-sm shadow-blue-500/5' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
@@ -34,7 +34,7 @@
                     </a>
 
                     <a href="{{ route('alumni.dokumen.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('alumni.dokumen.*') ? 'bg-blue-50 text-blue-700 font-bold shadow-sm shadow-blue-500/5' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <i class="fas fa-folder-open w-5 text-center text-base"></i> Berkas Dokumen (CV)
+                        <i class="fas fa-folder-open w-5 text-center text-base"></i> Berkas Dokumen
                     </a>
                     
                     <a href="{{ route('alumni.profil.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('alumni.profil.*') ? 'bg-blue-50 text-blue-700 font-bold shadow-sm shadow-blue-500/5' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
@@ -50,13 +50,13 @@
                     </div>
                     <div class="truncate">
                         <p class="text-sm font-bold text-slate-800 truncate">{{ auth()->user()->name }}</p>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Aktor Alumni</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Alumni</p>
                     </div>
                 </div>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" class="w-full bg-slate-200 hover:bg-rose-600 text-slate-700 hover:text-white transition-all font-semibold px-4 py-3 rounded-xl text-sm flex items-center justify-center gap-2 shadow-sm">
-                        <i class="fas fa-power-off text-xs"></i> Keluar Aplikasi
+                        <i class="fas fa-power-off text-xs"></i> Keluar Website
                     </button>
                 </form>
             </div>

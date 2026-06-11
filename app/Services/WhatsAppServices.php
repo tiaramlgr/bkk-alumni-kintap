@@ -2,79 +2,109 @@
 
 namespace App\Services;
 
+use App\Models\Alumni;
 use Illuminate\Support\Facades\Http;
-use App\Models\SiaranWa;
+use Illuminate\Support\Facades\Log;
 
-class WhatsAppService
+class WhatsappService
 {
-    protected $apiUrl;
-    protected $apiKey;
-
-    public function __construct()
+    /**
+     * Format nomor ke standar internasional (62)
+     */
+    public static function formatNomor(string $nomor): string
     {
-        $this->apiUrl = env('WHATSAPP_API_URL');
-        $this->apiKey = env('WHATSAPP_API_KEY');
+        $nomor = preg_replace('/\D/', '', $nomor);
+        if (str_starts_with($nomor, '0')) {
+            $nomor = '62' . substr($nomor, 1);
+        } elseif (!str_starts_with($nomor, '62')) {
+            $nomor = '62' . $nomor;
+        }
+        return $nomor;
     }
 
     /**
-     * Kirim pesan WhatsApp ke satu nomor
+     * Fungsi Inti Pengiriman ke Gateway (Fonnte / Lainnya)
      */
-    public function sendMessage($nomorWa, $pesan)
+    public static function kirimPesan(string $nomor, string $pesan): bool
     {
-        if (empty($this->apiUrl) || empty($this->apiKey)) {
-            return false; // API belum diatur
+        $url = rtrim(env('WA_GATEWAY_URL', ''), '/');
+        $token = env('WA_GATEWAY_TOKEN', '');
+
+        if (empty($url) || empty($token)) {
+            Log::info("Simulasi WA ke {$nomor}: {$pesan}");
+            return true;
         }
 
         try {
-            $response = Http::post($this->apiUrl, [
-                'target' => $nomorWa,
+            if (str_contains($url, 'fonnte.com')) {
+                $response = Http::withHeaders(['Authorization' => $token])
+                    ->post('https://api.fonnte.com/send', [
+                        'target'      => self::formatNomor($nomor),
+                        'message'     => $pesan,
+                        'countryCode' => '62',
+                    ]);
+                return $response->ok() && ($response->json()['status'] ?? false);
+            }
+
+            // Gateway umum lainnya
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type'  => 'application/json'
+            ])->post($url . '/send-message', [
+                'phone'   => self::formatNomor($nomor),
                 'message' => $pesan,
-                'api_key' => $this->apiKey,
             ]);
 
-            return $response->successful();
-        } catch (\Exception $e) {
+            return $response->ok();
+        } catch (\Throwable $e) {
+            Log::error("Gagal mengirim WA ke {$nomor}: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Broadcast Lowongan ke semua alumni
+     * Otomatisasi 1: Broadcast Lowongan Baru
      */
-    public function broadcastLowongan($lowongan)
+    public static function broadcastLowonganBaru($lowongan)
     {
-        $alumnis = \App\Models\Alumni::where('is_subscribe_wa', true)->get();
-
-        $siaran = SiaranWa::create([
-            'admin_id' => auth()->id(),
-            'judul_siaran' => 'Lowongan Kerja Baru: ' . $lowongan->judul_lowongan,
-            'jenis_siaran' => 'lowongan',
-            'referensi_id' => $lowongan->id,
-            'referensi_type' => 'App\Models\LowonganKerja',
-            'template_pesan' => "🔔 Lowongan Kerja Baru!\n\n" .
-                               "Judul: " . $lowongan->judul_lowongan . "\n" .
-                               "Perusahaan: " . $lowongan->nama_perusahaan . "\n" .
-                               "Lokasi: " . $lowongan->lokasi . "\n\n" .
-                               "Klik untuk detail: " . url('/alumni/lowongan/' . $lowongan->id),
-            'total_penerima' => $alumnis->count(),
-            'status_batch' => 'proses',
-        ]);
-
-        $berhasil = 0;
+        // Ambil semua alumni yang aktif dan subscribe WA
+        $alumnis = Alumni::with('user')
+            ->where('status_akun', 'approved')
+            ->where('is_subscribe_wa', true)
+            ->whereNotNull('no_hp_wa')
+            ->get();
 
         foreach ($alumnis as $alumni) {
-            if ($this->sendMessage($alumni->no_hp_wa, $siaran->template_pesan)) {
-                $berhasil++;
-            }
+            $pesan = "Halo *{$alumni->user->name}*,\n\n";
+            $pesan .= "📢 *LOWONGAN KERJA BARU DIMUAT!*\n\n";
+            $pesan .= "📌 Perusahaan: *{$lowongan->nama_perusahaan}*\n";
+            $pesan .= "💼 Posisi: _{$lowongan->posisi_pekerjaan}_\n";
+            $pesan .= "📅 Batas Pendaftaran: " . date('d M Y', strtotime($lowongan->batas_pendaftaran)) . "\n\n";
+            $pesan .= "Silakan login ke Portal BKK SMKN Kintap untuk melihat detail rincian dan mengirimkan lamaran Anda.\n\n";
+            $pesan .= "Sistem Informasi BKK SMKN Kintap.";
+
+            self::kirimPesan($alumni->no_hp_wa, $pesan);
         }
+    }
 
-        $siaran->update([
-            'berhasil' => $berhasil,
-            'gagal' => $alumnis->count() - $berhasil,
-            'status_batch' => 'selesai',
-            'dikirim_at' => now(),
-        ]);
+    /**
+     * Otomatisasi 2: Notifikasi Penerimaan Pelamar
+     */
+    public static function notifikasiPelamarDiterima($lamaran)
+    {
+        $alumni = Alumni::with('user')->find($lamaran->alumni_id);
+        
+        if ($alumni && $alumni->is_subscribe_wa && $alumni->no_hp_wa) {
+            // Menggunakan operator null-safe (?->) bawaan PHP 8
+            // Jika $alumni->user tidak ada, maka akan menggunakan 'Alumni' sebagai nama default
+            $namaPenerima = $alumni->user?->name ?? 'Alumni';
+            $pesan = "Halo *{$namaPenerima}*,\n\n";
+            $pesan .= "Kami ingin mengabarkan bahwa lamaran Anda untuk posisi *{$lamaran->lowongan->posisi_pekerjaan}* di *{$lamaran->lowongan->nama_perusahaan}* telah dinyatakan *DITERIMA* oleh pihak perusahaan.\n\n";
+            $pesan .= "Silakan periksa menu 'Riwayat Lamaran' di portal BKK atau tunggu instruksi selanjutnya dari tim HCGA/HRD terkait jadwal pemanggilan kerja.\n\n";
+            $pesan .= "Sukses selalu untuk karier Anda!\n\n";
+            $pesan .= "Sistem Informasi BKK SMKN Kintap.";
 
-        return $berhasil;
+            self::kirimPesan($alumni->no_hp_wa, $pesan);
+        }
     }
 }

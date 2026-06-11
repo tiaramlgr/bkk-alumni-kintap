@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TracerStudy;
 use App\Models\Alumni;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TracerStudyController extends Controller
 {
@@ -19,10 +20,9 @@ class TracerStudyController extends Controller
 
     public function create()
     {
-        // Admin bisa buat tracer study untuk alumni yang belum punya
+        // Menampilkan semua alumni yang sudah diapprove
         $alumnis = Alumni::with('user')
                          ->where('status_akun', 'approved')
-                         ->doesntHave('tracerStudy')
                          ->get();
         return view('admin.tracer.create', compact('alumnis'));
     }
@@ -30,10 +30,17 @@ class TracerStudyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'alumni_id'          => 'required|exists:alumnis,id|unique:tracer_studies,alumni_id',
-            'tahun_pengisian'    => 'required|integer|min:2000|max:' . date('Y'),
-            'status_aktivitas'   => 'required|in:bekerja,wirausaha,kuliah,belum_bekerja,lainnya',
-            'keterangan_status'  => 'nullable|string',
+            // Validasi: 1 alumni hanya boleh punya 1 data di tahun yang sama
+            'alumni_id' => [
+                'required', 
+                'exists:alumnis,id',
+                Rule::unique('tracer_studies')->where(function ($query) use ($request) {
+                    return $query->where('tahun_pengisian', $request->tahun_pengisian);
+                })
+            ],
+            'tahun_pengisian'   => 'required|integer|min:2000|max:' . (date('Y') + 1),
+            'status_aktivitas'  => 'required|in:bekerja,wirausaha,kuliah,menganggur,lainnya',
+            'keterangan_status' => 'nullable|string',
         ]);
 
         TracerStudy::create($request->only([
@@ -65,8 +72,16 @@ class TracerStudyController extends Controller
         $tracer = TracerStudy::findOrFail($id);
 
         $request->validate([
-            'tahun_pengisian'   => 'required|integer|min:2000|max:' . date('Y'),
-            'status_aktivitas'  => 'required|in:bekerja,wirausaha,kuliah,belum_bekerja,lainnya',
+            'tahun_pengisian' => [
+                'required',
+                'integer',
+                'min:2000',
+                'max:' . (date('Y') + 1),
+                Rule::unique('tracer_studies')->where(function ($query) use ($tracer) {
+                    return $query->where('alumni_id', $tracer->alumni_id);
+                })->ignore($id) // Abaikan id yang sedang diedit
+            ],
+            'status_aktivitas'  => 'required|in:bekerja,wirausaha,kuliah,menganggur,lainnya',
             'keterangan_status' => 'nullable|string',
         ]);
 

@@ -25,7 +25,7 @@ class User extends Authenticatable
 
     public function alumni()
     {
-        return $this->hasOne(Alumni::class);
+        return $this->hasOne(Alumni::class, 'user_id');
     }
 
     public function company()

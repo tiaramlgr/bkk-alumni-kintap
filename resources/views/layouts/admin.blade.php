@@ -15,72 +15,70 @@
                 <p class="text-sm opacity-90">SMK Negeri Kintap</p>
             </div>
             
-            <nav class="flex-1 p-4 space-y-1">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-blue-50 {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700' : '' }}">
-                    <i class="fas fa-home w-5"></i> Dashboard
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <a href="{{ route('admin.dashboard') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
+                    <i class="fas fa-home w-5 text-center transition-transform group-hover:scale-110"></i> 
+                    <span>Dashboard</span>
                 </a>
                 
-                <div class="px-4 py-2 text-xs font-semibold text-gray-500 mt-4">MANAJEMEN UTAMA</div>
+                <div class="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mt-4">Manajemen Utama</div>
                 
-                <a href="{{ route('admin.alumni.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-blue-50">
-                    <i class="fas fa-users w-5"></i> Kelola Alumni
+                <a href="{{ route('admin.alumni.index') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.alumni.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
+                    <i class="fas fa-users w-5 text-center transition-transform group-hover:scale-110"></i> 
+                    <span>Kelola Alumni</span>
                 </a>
                 
-                @php
-                    $isMasterData = request()->routeIs('admin.jurusan.*') || request()->routeIs('admin.kategori-lowongan.*');
-                @endphp
-                <div>
-                    <button type="button" onclick="document.getElementById('masterDataMenu').classList.toggle('hidden'); document.getElementById('masterDataIcon').classList.toggle('rotate-180');" 
-                            class="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-colors {{ $isMasterData ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-50 text-gray-700' }}">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-database w-5"></i> 
-                            <span>Master Data</span>
-                        </div>
-                        <i id="masterDataIcon" class="fas fa-chevron-down text-xs transition-transform duration-200 {{ $isMasterData ? 'rotate-180' : '' }}"></i>
-                    </button>
-                    
-                    <div id="masterDataMenu" class="{{ $isMasterData ? 'block' : 'hidden' }} mt-1 space-y-1 pl-9 pr-2">
-                        <a href="{{ route('admin.jurusan.index') }}" class="block px-4 py-2 text-sm rounded-xl transition-colors {{ request()->routeIs('admin.jurusan.*') ? 'text-blue-700 font-semibold bg-blue-50' : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50' }}">
-                            Kelola Jurusan
-                        </a>
-                        <a href="{{ route('admin.kategori-lowongan.index') }}" class="block px-4 py-2 text-sm rounded-xl transition-colors {{ request()->routeIs('admin.kategori-lowongan.*') ? 'text-blue-700 font-semibold bg-blue-50' : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50' }}">
-                            Kategori Lowongan
-                        </a>
-                    </div>
-                </div>
-                <a href="{{ route('admin.lowongan.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-blue-50">
-                    <i class="fas fa-briefcase w-5"></i> Lowongan Kerja
-                </a>
+                <a href="{{ route('admin.lowongan.index') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.lowongan.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
+                    <i class="fas fa-briefcase w-5 text-center transition-transform group-hover:scale-110"></i> 
+                    <span>Lowongan Kerja</span>
+                </a>                
                 
-                <a href="{{ route('alumni.dokumen.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-blue-50">
-                    <i class="fas fa-file-upload w-5"></i> Dokumen Alumni
-                </a>
-                
-                <a href="{{ route('admin.siaran.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-blue-50">
-                    <i class="fas fa-paper-plane w-5"></i> Siaran WhatsApp
+                <a href="{{ route('admin.dokumen.index') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.dokumen.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
+                    <i class="fas fa-folder-open w-5 text-center transition-transform group-hover:scale-110"></i> 
+                    <span>Dokumen Alumni</span>
                 </a>
 
-                <div class="px-4 py-2 text-xs font-semibold text-gray-500 mt-4">LAINNYA</div>
+                <a href="{{ route('admin.siaran.index') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.siaran.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
+                    <i class="fas fa-paper-plane w-5 text-center transition-transform group-hover:scale-110"></i> 
+                    <span>Siaran WhatsApp</span>
+                </a>
+
+                <div class="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mt-4">Lainnya</div>
                 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-blue-50">
-                    <i class="fas fa-chart-bar w-5"></i> Tracer Study
+                <a href="{{ route('admin.tracer.index') }}" 
+                   class="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.tracer.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-semibold' : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600' }}">
+                     <i class="fas fa-route text-lg w-6 text-center"></i>
+                    <span>Tracer Study</span>
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-blue-50">
-                    <i class="fas fa-history w-5"></i> Activity Log
+
+                <a href="{{ route('admin.activity-log') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.activity-log') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
+                    <i class="fas fa-history w-5 text-center transition-transform group-hover:scale-110"></i> 
+                    <span>Activity Log</span>
                 </a>
-                <a href="{{ route('admin.export.alumni') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-blue-50">
-                    <i class="fas fa-file-excel w-5"></i> Export Data Alumni
+
+                <a href="{{ route('admin.export.alumni') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.export.alumni') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
+                    <i class="fas fa-file-excel w-5 text-center transition-transform group-hover:scale-110"></i> 
+                    <span>Export Data Alumni</span>
                 </a>
             </nav>
         </div>
 
         <div class="flex-1 flex flex-col overflow-hidden">
             <header class="bg-white border-b px-8 py-4 flex justify-between items-center">
-                <h2 class="text-xl font-semibold">@yield('title')</h2>
+                <h2 class="text-xl font-semibold text-slate-800">@yield('title')</h2>
                 <div class="flex items-center gap-4">
-                    <span class="text-sm">{{ auth()->user()->name ?? 'Admin BKK' }}</span>
+                    <span class="text-sm font-medium text-slate-600">{{ auth()->user()->name ?? 'Admin BKK' }}</span>
                     <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
-                       class="text-red-600 hover:text-red-700">Logout</a>
+                       class="text-red-600 hover:text-red-700 font-semibold text-sm transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </a>
                 </div>
             </header>
             
