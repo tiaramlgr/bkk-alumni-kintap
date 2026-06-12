@@ -7,6 +7,7 @@ use App\Models\LowonganKerja;
 use App\Models\Lamaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+// Hapus baris WhatsappService di sini karena tidak digunakan di halaman Alumni
 
 class LowonganController extends Controller
 {
@@ -71,10 +72,21 @@ class LowonganController extends Controller
             'status_lamaran' => 'pending',
         ];
 
+        // JURUS ULTIMATE: Bypass Flysystem Laravel, gunakan fungsi move() langsung!
         if ($request->hasFile('file_cv')) {
             $file = $request->file('file_cv');
-            $namaFile = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/cv', $namaFile);
+            
+            // Ambil ekstensi, jika gagal terbaca, paksa menjadi 'pdf'
+            $ext = $file->getClientOriginalExtension() ?: 'pdf';
+            $namaFile = 'cv_' . time() . '_' . uniqid() . '.' . $ext;
+            
+            // Tentukan jalur absolut (langsung menembak ke folder di komputer Anda)
+            $tujuan_upload = storage_path('app/public/cv');
+            
+            // Pindahkan file secara paksa dan langsung
+            $file->move($tujuan_upload, $namaFile);
+            
+            // Simpan nama path ke database
             $data['file_cv'] = 'cv/' . $namaFile;
         }
 
@@ -85,5 +97,6 @@ class LowonganController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
+        
     }
 }

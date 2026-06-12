@@ -4,6 +4,12 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto">
+    
+    <div class="mb-6">
+        <a href="{{ route('alumni.tracer.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-200 hover:shadow">
+            <i class="fas fa-arrow-left text-xs"></i> Kembali ke Beranda Tracer
+        </a>
+    </div>
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-slate-800">Kuesioner Tracer Study</h1>
         <p class="text-slate-500 mt-2">Bantu SMK Negeri Kintap memantau perkembangan karir Anda.</p>

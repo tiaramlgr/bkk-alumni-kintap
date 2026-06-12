@@ -17,28 +17,41 @@ class PerusahaanRegisterController extends Controller
 
     public function register(Request $request)
     {
+        // 1. Validasi disesuaikan dengan apa yang benar-benar ada di form
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
-            'nama_perusahaan' => 'required|string',
-            'no_hp_wa' => 'required|string',
+            'nama_perusahaan' => 'required|string|max:255',
+            'email'           => 'required|email|unique:users,email',
+            'password'        => 'required|min:6|confirmed',
+            'no_hp_wa'        => 'required|string', 
+            'alamat'          => 'nullable|string',
+        ], [
+            // Tambahan opsional: Pesan error bahasa Indonesia agar lebih rapi
+            'nama_perusahaan.required' => 'Nama perusahaan wajib diisi.',
+            'no_hp_wa.required'        => 'Nomor Telepon / WA wajib diisi.',
+            'email.unique'             => 'Email ini sudah terdaftar.',
+            'password.confirmed'       => 'Konfirmasi password tidak cocok.'
         ]);
 
+        // 2. Buat Akun Login (Tabel users)
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            // Gunakan nama_perusahaan untuk mengisi kolom name
+            'name'     => $request->nama_perusahaan, 
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'perusahaan',
+            'role'     => 'perusahaan',
         ]);
 
+        // 3. Buat Profil Perusahaan (Tabel companies)
         Company::create([
-            'user_id' => $user->id,
+            'user_id'         => $user->id,
             'nama_perusahaan' => $request->nama_perusahaan,
-            'no_hp_wa' => $request->no_hp_wa,
-            'alamat' => $request->alamat ?? null,
+            'no_hp_wa'        => $request->no_hp_wa,
+            // Jika Anda menambahkan kolom email_kantor di tabel companies, uncomment baris di bawah:
+            // 'email_kantor' => $request->email,
+            'alamat'          => $request->alamat,
         ]);
 
+        // 4. Login otomatis setelah mendaftar
         auth()->login($user);
 
         return redirect()->route('perusahaan.dashboard');

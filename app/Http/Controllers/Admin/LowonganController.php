@@ -137,27 +137,23 @@ class LowonganController extends Controller
         return view('admin.lowongan.pelamar', compact('lowongan', 'lamarans'));
     }
 
-    public function updateStatusLamaran(Request $request, $id)
+public function updateStatusLamaran(Request $request, $id)
     {
-        $request->validate([
-            'status_lamaran' => 'required|in:pending,review,diterima,ditolak',
-            'catatan_admin'  => 'nullable|string'
-        ]);
-
-        // Eager load lowongan agar nama perusahaan/posisi bisa dibaca oleh pesan WA
-        $lamaran = Lamaran::with('lowongan')->findOrFail($id);
+        $lamaran = \App\Models\Lamaran::findOrFail($id);
         
         $lamaran->update([
             'status_lamaran' => $request->status_lamaran,
             'catatan_admin'  => $request->catatan_admin
         ]);
 
-        // OTOMATISASI WA: Jika status diubah menjadi "diterima", kirim notifikasi pribadi
+        // OTOMATISASI WA: DIMATIKAN SEMENTARA AGAR TIDAK ERROR
+        /*
         if ($request->status_lamaran === 'diterima') {
-            WhatsappService::notifikasiPelamarDiterima($lamaran);
-            return redirect()->back()->with('success', 'Status lamaran diterima dan Notifikasi WA telah dikirim ke pelamar.');
+             $wa = new \App\Services\WhatsappService();
+             $wa->kirimNotifikasi($lamaran->alumni->no_hp, "Selamat Anda Diterima!");
         }
+        */
 
-        return redirect()->back()->with('success', 'Status lamaran alumni berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Status lamaran berhasil diperbarui menjadi ' . $request->status_lamaran);
     }
 }

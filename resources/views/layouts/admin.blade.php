@@ -29,6 +29,12 @@
                     <i class="fas fa-users w-5 text-center transition-transform group-hover:scale-110"></i> 
                     <span>Kelola Alumni</span>
                 </a>
+
+                <a href="{{ route('admin.tracer.index') }}" 
+                   class="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.tracer.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
+                     <i class="fas fa-route text-lg w-6 text-center"></i>
+                    <span>Tracer Study</span>
+                </a>
                 
                 <a href="{{ route('admin.lowongan.index') }}" 
                    class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.lowongan.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
@@ -49,12 +55,14 @@
                 </a>
 
                 <div class="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mt-4">Lainnya</div>
-                
-                <a href="{{ route('admin.tracer.index') }}" 
-                   class="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.tracer.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-semibold' : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600' }}">
-                     <i class="fas fa-route text-lg w-6 text-center"></i>
-                    <span>Tracer Study</span>
-                </a>
+
+                <a href="{{ route('admin.perusahaan.index') }}" 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {{ request()->routeIs('admin.perusahaan.*') ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600' }}">
+                    <div class="w-6 flex justify-center">
+                        <i class="fas fa-building {{ request()->routeIs('admin.perusahaan.*') ? 'text-blue-600' : 'text-slate-400' }}"></i>
+                    </div>
+                    <span>Kelola Perusahaan</span>
+                </a>   
 
                 <a href="{{ route('admin.activity-log') }}" 
                    class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.activity-log') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">

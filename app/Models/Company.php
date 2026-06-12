@@ -17,6 +17,8 @@ class Company extends Model
         'email_kantor',
         'deskripsi',
         'status',
+        'sektor_industri',
+        'alamat',
     ];
 
     public function user()

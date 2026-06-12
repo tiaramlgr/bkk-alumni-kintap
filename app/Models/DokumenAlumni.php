@@ -15,6 +15,7 @@ class DokumenAlumni extends Model
         'tipe_dokumen',
         'nama_file',
         'path_file',
+        'file_dokumen',
         'tahun_dokumen',
         'is_active', // Ini untuk Admin
         'status_verifikasi', // Baru: 'pending', 'approved', 'rejected'

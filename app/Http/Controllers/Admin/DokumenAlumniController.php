@@ -46,7 +46,7 @@ class DokumenAlumniController extends Controller
             $request->validate([
                 'alumni_id'     => 'required|exists:alumnis,id',
                 'tipe_dokumen'  => 'required|string|max:100',
-                'file_dokumen'  => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'file_dokumen' => 'required|file|mimes:pdf,jpg,png|max:5120',
                 'tahun_dokumen' => 'required|integer|min:2000|max:' . date('Y'),
             ]);
 

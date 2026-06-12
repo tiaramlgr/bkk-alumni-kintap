@@ -24,6 +24,8 @@ class LowonganKerja extends Model
         'deadline',
         'status',
         'siaran_wa',
+        'sektor_industri',
+        'no_telepon',
     ];
 
     protected $casts = [

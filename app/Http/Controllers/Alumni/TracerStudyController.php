@@ -22,7 +22,12 @@ class TracerStudyController extends Controller
     // Form untuk membuat baru
     public function create()
     {
-        return view('alumni.tracer.create');
+        // Trik: Kita buat "kerangka kosong" dari TracerStudy
+        // agar file edit.blade.php tidak error saat mencari data $tracer
+        $tracer = new \App\Models\TracerStudy();
+
+        // Kita arahkan ke tampilan edit saja!
+        return view('alumni.tracer.edit', compact('tracer'));
     }
 
     // Proses simpan data baru
@@ -39,10 +44,17 @@ class TracerStudyController extends Controller
         return redirect()->route('alumni.tracer.index')->with('success', 'Data Tracer Study berhasil disimpan.');
     }
 
-    // Form untuk Edit
     public function edit()
     {
-        $tracer = TracerStudy::where('alumni_id', Auth::user()->alumni->id)->firstOrFail();
+        // Ganti firstOrFail() menjadi first() saja
+        $tracer = TracerStudy::where('alumni_id', Auth::user()->alumni->id)->first();
+
+        // Jika data belum ada (akun baru), otomatis alihkan ke halaman pengisian (create)
+        if (!$tracer) {
+            return redirect()->route('alumni.tracer.create')
+                             ->with('info', 'Silakan isi data Tracer Study Anda terlebih dahulu.');
+        }
+
         return view('alumni.tracer.edit', compact('tracer'));
     }
 

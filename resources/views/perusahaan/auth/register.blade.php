@@ -48,7 +48,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-1.5">No. Telepon HRD <span class="text-red-500">*</span></label>
-                            <input type="text" name="no_telepon" value="{{ old('no_telepon') }}" required 
+                            <input type="text" name="no_hp_wa" value="{{ old('no_hp_wa') }}" required 
                                    class="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white">
                         </div>
                     </div>

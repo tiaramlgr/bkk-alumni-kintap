@@ -19,7 +19,7 @@ use App\Http\Controllers\Admin\DokumenAlumniController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\TracerStudyController as AdminTracerController;
-
+use App\Http\Controllers\Admin\PerusahaanController;
 // ================= ALUMNI CONTROLLERS =================
 use App\Http\Controllers\Alumni\LowonganController as AlumniLowonganController;
 use App\Http\Controllers\Alumni\DokumenController;
@@ -105,6 +105,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/alumni/{id}/approve', [AlumniController::class, 'approve'])->name('alumni.approve');
         Route::post('/alumni/{id}/reject', [AlumniController::class, 'reject'])->name('alumni.reject');
 
+        Route::resource('perusahaan', \App\Http\Controllers\Admin\PerusahaanController::class);
+        // Rute Kelola Perusahaan (Tanpa fitur tambah data)
+        Route::resource('perusahaan', \App\Http\Controllers\Admin\PerusahaanController::class)->except(['create', 'store']);
         Route::resource('lowongan', LowonganController::class);
         Route::get('lowongan/{id}/pelamar', [LowonganController::class, 'pelamar'])->name('lowongan.pelamar');
         Route::post('lamaran/{id}/status', [LowonganController::class, 'updateStatusLamaran'])->name('lamaran.status');

@@ -20,8 +20,8 @@
                     <a href="{{ route('alumni.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('alumni.dashboard') ? 'bg-blue-50 text-blue-700 font-bold shadow-sm shadow-blue-500/5' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fas fa-home w-5 text-center text-base"></i> Dashboard
                     </a>
-                    
-                    <a href="{{ route('alumni.tracer.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('alumni.tracer.*') ? 'bg-blue-50 text-blue-700 font-bold shadow-sm shadow-blue-500/5' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+
+                    <a href="{{ route('alumni.tracer.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('alumni.tracer.*') ? 'bg-blue-50 text-blue-700 font-bold shadow-sm shadow-blue-500/5' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fas fa-paste w-5 text-center text-base"></i>  Tracer Study
                     </a>
                     

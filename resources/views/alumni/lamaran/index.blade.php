@@ -23,13 +23,20 @@
                     <td class="px-6 py-4">{{ $lamaran->lowongan->nama_perusahaan ?? '-' }}</td>
                     <td class="px-6 py-4">{{ $lamaran->created_at->format('d M Y') }}</td>
                     <td class="px-6 py-4 text-center">
-                        @if($lamaran->status_lamaran == 'pending')
-                            <span class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-sm">Menunggu</span>
-                        @elseif($lamaran->status_lamaran == 'diterima')
-                            <span class="bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm">Diterima</span>
-                        @else
-                            <span class="bg-red-100 text-red-700 px-4 py-1 rounded-full text-sm">Ditolak</span>
-                        @endif
+                    @if($lamaran->status_lamaran == 'pending')
+                        <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-bold">Menunggu</span>
+
+                    @elseif($lamaran->status_lamaran == 'direview' || $lamaran->status_lamaran == 'review')
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">Sedang Direview</span>
+                    @elseif($lamaran->status_lamaran == 'diterima')
+                        <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-bold">Diterima</span>
+
+                    @elseif($lamaran->status_lamaran == 'ditolak')
+                        <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-sm font-bold">Ditolak</span>
+
+                    @else
+                        <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-bold">{{ ucfirst($lamaran->status_lamaran) }}</span>
+                    @endif
                     </td>
                 </tr>
                 @empty
