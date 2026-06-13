@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\LowonganKerja;
 use App\Models\KategoriLowongan;
 use App\Models\Lamaran;
-use App\Services\WhatsappService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -61,18 +60,11 @@ class LowonganController extends Controller
             $data['foto'] = 'lowongan/' . $namaFoto;
         }
 
-        // Tampung data yang baru dibuat ke dalam variabel $lowongan
-        $lowongan = LowonganKerja::create($data);
-
-        // OTOMATISASI WA: Jika checkbox siaran WA dicentang, kirim broadcast
-        if ($lowongan->siaran_wa) {
-            WhatsappService::broadcastLowonganBaru($lowongan);
-            return redirect()->route('admin.lowongan.index')
-                             ->with('success', 'Lowongan berhasil dibuat & Siaran WA berhasil dikirim ke Alumni!');
-        }
+        // Murni hanya menyimpan ke database saja
+        LowonganKerja::create($data);
 
         return redirect()->route('admin.lowongan.index')
-                         ->with('success', 'Lowongan berhasil dibuat tanpa siaran WA.');
+                         ->with('success', 'Lowongan berhasil dibuat.');
     }
 
     public function edit($id)
@@ -103,7 +95,6 @@ class LowonganController extends Controller
         ]);
         $data['siaran_wa'] = $request->has('siaran_wa');
 
-        // JURUS ULTIMATE: Bypass Flysystem, gunakan move() langsung
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
             $ext = $foto->getClientOriginalExtension() ?: 'png';
@@ -117,7 +108,7 @@ class LowonganController extends Controller
 
         $lowongan->update($data);
 
-        return redirect()->route('perusahaan.lowongan.index')
+        return redirect()->route('admin.lowongan.index')
                          ->with('success', 'Sip! Data lowongan kerja berhasil diperbarui.');
     }
 
@@ -155,14 +146,6 @@ class LowonganController extends Controller
             'status_lamaran' => $request->status_lamaran,
             'catatan_admin'  => $request->catatan_admin
         ]);
-
-        // OTOMATISASI WA: DIMATIKAN SEMENTARA AGAR TIDAK ERROR
-        /*
-        if ($request->status_lamaran === 'diterima') {
-             $wa = new \App\Services\WhatsappService();
-             $wa->kirimNotifikasi($lamaran->alumni->no_hp, "Selamat Anda Diterima!");
-        }
-        */
 
         return redirect()->back()->with('success', 'Status lamaran berhasil diperbarui menjadi ' . $request->status_lamaran);
     }

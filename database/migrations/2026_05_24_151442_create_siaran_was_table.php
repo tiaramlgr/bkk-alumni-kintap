@@ -6,28 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('siaran_was', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('admin_id')->constrained('users');
-            
-            $table->string('judul_siaran');
-            $table->enum('jenis_siaran', ['lowongan', 'berita', 'pengumuman', 'lainnya']);
-            $table->morphs('referensi'); // untuk lowongan atau berita
-            $table->text('template_pesan');
-            $table->integer('total_penerima')->default(0);
-            $table->integer('berhasil')->default(0);
-            $table->integer('gagal')->default(0);
-            $table->enum('status_batch', ['pending', 'proses', 'selesai', 'gagal'])->default('pending');
-            $table->timestamp('dikirim_at')->nullable();
-            
-            $table->timestamps();
+        Schema::table('siaran_was', function (Blueprint $table) {
+            // morphs() default membuat kolom NOT NULL -> gagal saat siaran manual
+            // (controller tidak mengisi referensi_id/referensi_type)
+            $table->unsignedBigInteger('referensi_id')->nullable()->change();
+            $table->string('referensi_type')->nullable()->change();
+
+            // dipakai controller untuk menyimpan ringkasan hasil kirim
+            $table->json('meta')->nullable()->after('dikirim_at');
         });
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('siaran_was');
+        Schema::table('siaran_was', function (Blueprint $table) {
+            $table->dropColumn('meta');
+        });
     }
 };

@@ -15,7 +15,6 @@ class LowonganController extends Controller
      */
     public function index()
     {
-        // Mengambil lowongan yang dibuat oleh admin_id (User ID Perusahaan ini)
         $lowongans = LowonganKerja::with('kategori')
             ->where('admin_id', Auth::id())
             ->latest()
@@ -33,7 +32,6 @@ class LowonganController extends Controller
         return view('perusahaan.lowongan.create', compact('kategoris'));
     }
 
-// --- 1. FUNGSI STORE ---
     public function store(Request $request)
     {
         $request->validate([
@@ -44,7 +42,7 @@ class LowonganController extends Controller
             'deskripsi'      => 'required|string',
             'kualifikasi'    => 'required|string',
             'deadline'       => 'required|date',
-            'foto'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Tambahan Validasi Foto
+            'foto'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $user = auth()->user();
@@ -61,10 +59,9 @@ class LowonganController extends Controller
             'kualifikasi'     => $request->kualifikasi,
             'deadline'        => $request->deadline,
             'status'          => 'aktif', 
-            'siaran_wa'       => 0, 
+            'siaran_wa'       => 0, // Kembali normal tanpa paksaan broadcast
         ];
 
-        // JURUS ULTIMATE UPLOAD FOTO
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
             $ext = $foto->getClientOriginalExtension() ?: 'png';
@@ -96,7 +93,6 @@ class LowonganController extends Controller
     /**
      * Memperbarui data lowongan kerja di database.
      */
-// --- 2. FUNGSI UPDATE ---
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -107,7 +103,7 @@ class LowonganController extends Controller
             'deskripsi'      => 'required|string',
             'kualifikasi'    => 'required|string',
             'deadline'       => 'required|date',
-            'foto'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Tambahan Validasi Foto
+            'foto'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $lowongan = \App\Models\LowonganKerja::findOrFail($id);
@@ -117,7 +113,6 @@ class LowonganController extends Controller
             'deskripsi', 'kualifikasi', 'deadline', 'kategori_id'
         ]);
 
-        // JURUS ULTIMATE UPLOAD FOTO (TIMPA FOTO LAMA)
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
             $ext = $foto->getClientOriginalExtension() ?: 'png';
@@ -135,14 +130,13 @@ class LowonganController extends Controller
                          ->with('success', 'Lowongan berhasil diperbarui!');
     }
 
-    // --- 3. FUNGSI UPDATE STATUS PELAMAR ---
     public function updateStatusLamaran(Request $request, $id)
     {
         $lamaran = \App\Models\Lamaran::findOrFail($id);
         
         $lamaran->update([
             'status_lamaran' => $request->status_lamaran,
-            'catatan_admin'  => $request->catatan_admin // Ini bisa dipakai sebagai catatan HRD Perusahaan
+            'catatan_admin'  => $request->catatan_admin
         ]);
 
         return redirect()->back()->with('success', 'Status pelamar berhasil diperbarui menjadi ' . $request->status_lamaran);
@@ -150,7 +144,6 @@ class LowonganController extends Controller
    
     public function show($id)
     {
-        // Ambil data lowongan beserta relasi kategorinya
         $lowongan = \App\Models\LowonganKerja::with('kategori')->findOrFail($id);
         
         return view('perusahaan.lowongan.show', compact('lowongan'));

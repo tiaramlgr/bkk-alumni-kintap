@@ -15,10 +15,20 @@ class SiaranWa extends Model
         'admin_id',
         'judul_siaran',
         'jenis_siaran',
+        'referensi_id',
+        'referensi_type',
         'template_pesan',
         'total_penerima',
+        'berhasil',
+        'gagal',
         'status_batch',
+        'dikirim_at',
         'meta',
+    ];
+
+    protected $casts = [
+        'dikirim_at' => 'datetime',
+        'meta'       => 'array', // otomatis encode/decode JSON, tidak perlu json_encode manual
     ];
 
     public function admin()

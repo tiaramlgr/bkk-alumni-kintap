@@ -84,13 +84,6 @@
                 </div>
             </div>
 
-            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-center gap-3">
-                <input type="checkbox" name="siaran_wa" id="siaran_wa" class="w-5 h-5 accent-blue-600 rounded">
-                <label for="siaran_wa" class="text-sm font-semibold text-blue-800 cursor-pointer">
-                    Kirim notifikasi otomatis via WhatsApp ke seluruh alumni aktif saat lowongan ini dipublikasikan.
-                </label>
-            </div>
-
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all text-lg mt-4">
                 <i class="fas fa-paper-plane mr-2"></i>Tambah Lowongan
             </button>

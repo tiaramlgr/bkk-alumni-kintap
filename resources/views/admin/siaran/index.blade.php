@@ -53,20 +53,29 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <div class="flex items-center justify-center space-x-3">
-                            @if($siaran->status_batch == 'draft')
-                            <form action="{{ route('admin.siaran.send', $siaran->id) }}" method="POST" class="inline" onsubmit="return confirm('Kirim broadcast ini ke semua alumni sekarang?')">
-                                @csrf
-                                <button type="submit" class="bg-blue-600 text-white w-8 h-8 rounded-full hover:bg-blue-700 transition" title="Kirim Sekarang">
-                                    <i class="fas fa-paper-plane text-xs"></i>
-                                </button>
-                            </form>
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{{ route('admin.siaran.show', $siaran->id) }}" class="bg-slate-100 text-slate-600 w-8 h-8 rounded-full hover:bg-slate-200 flex items-center justify-center transition" title="Lihat Detail">
+                                <i class="fas fa-eye text-xs"></i>
+                            </a>
+
+                            @if($siaran->status_batch == 'pending' || $siaran->status_batch == 'draft')
+                                <a href="{{ route('admin.siaran.edit', $siaran->id) }}" class="bg-amber-100 text-amber-600 w-8 h-8 rounded-full hover:bg-amber-200 flex items-center justify-center transition" title="Edit Draft">
+                                    <i class="fas fa-edit text-xs"></i>
+                                </a>
+
+                                <form action="{{ route('admin.siaran.send', $siaran->id) }}" method="POST" class="inline" onsubmit="return confirm('Kirim broadcast ini ke Grup sekarang?')">
+                                    @csrf
+                                    <button type="submit" class="bg-blue-600 text-white w-8 h-8 rounded-full hover:bg-blue-700 flex items-center justify-center transition shadow-md shadow-blue-500/30" title="Kirim Sekarang">
+                                        <i class="fas fa-paper-plane text-xs"></i>
+                                    </button>
+                                </form>
                             @endif
 
-                            <form action="{{ route('admin.siaran.send', $siaran->id) }}" method="POST" class="inline" onsubmit="return confirm('Kirim broadcast?')">
+                            <form action="{{ route('admin.siaran.destroy', $siaran->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus riwayat siaran ini secara permanen?')">
                                 @csrf
-                                <button type="submit" class="bg-blue-600 text-white w-8 h-8 rounded-full hover:bg-blue-700 transition" title="Kirim Sekarang">
-                                    <i class="fas fa-paper-plane text-xs"></i>
+                                @method('DELETE')
+                                <button type="submit" class="bg-rose-100 text-rose-600 w-8 h-8 rounded-full hover:bg-rose-200 flex items-center justify-center transition" title="Hapus">
+                                    <i class="fas fa-trash text-xs"></i>
                                 </button>
                             </form>
                         </div>
