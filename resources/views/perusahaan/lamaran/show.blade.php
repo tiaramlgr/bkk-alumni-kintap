@@ -35,14 +35,15 @@
             @method('PUT')
 
             <label class="block text-sm font-medium mb-3">Update Status Lamaran</label>
-            <select name="status" class="w-full px-5 py-4 border rounded-2xl mb-6">
-                <option value="pending" {{ $lamaran->status_lamaran == 'pending' ? 'selected' : '' }}>Menunggu Proses</option>
-                <option value="diterima" {{ $lamaran->status_lamaran == 'diterima' ? 'selected' : '' }}>✅ Diterima</option>
-                <option value="ditolak" {{ $lamaran->status_lamaran == 'ditolak' ? 'selected' : '' }}>❌ Ditolak</option>
+            <select name="status_lamaran" class="text-sm border-gray-300 rounded-xl px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                <option value="pending" {{ $lamaran->status_lamaran == 'pending' ? 'selected' : '' }}>Pending (Menunggu)</option>
+                <option value="direview" {{ $lamaran->status_lamaran == 'direview' ? 'selected' : '' }}>Direview</option>
+                <option value="diterima" {{ $lamaran->status_lamaran == 'diterima' ? 'selected' : '' }}>Diterima</option>
+                <option value="ditolak" {{ $lamaran->status_lamaran == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
             </select>
-
+            
             <label class="block text-sm font-medium mb-3">Catatan untuk Pelamar</label>
-            <textarea name="catatan" rows="4" class="w-full px-5 py-4 border rounded-2xl">{{ $lamaran->catatan_admin }}</textarea>
+            <textarea name="catatan_admin" rows="4" class="w-full px-5 py-4 border rounded-2xl">{{ $lamaran->catatan_admin }}</textarea>
 
             <button type="submit" class="mt-8 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-semibold text-lg">
                 SIMPAN STATUS LAMARAN

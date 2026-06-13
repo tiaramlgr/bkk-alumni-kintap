@@ -34,15 +34,14 @@ class PerusahaanLoginController extends Controller
         return redirect()->back()->with('error', 'Email atau password salah.');
     }
 
-    public function logout(Request $request) // Tambahkan Request jika ingin menghapus session lebih bersih
+    public function logout(Request $request)
     {
-        Auth::logout();
-        
-        // Opsional tetapi disarankan untuk keamanan session Laravel
+        Auth::guard('web')->logout(); // Atau sesuai guard yang Anda gunakan
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
-        // Mengarahkan kembali ke Landing Page (route dengan nama 'home')
-        return redirect()->route('home'); 
+
+        // UBAH BARIS INI: Arahkan ke rute landing.index
+        return redirect()->route('landing.index')->with('success', 'Sesi perusahaan telah diakhiri.');
     }
 }

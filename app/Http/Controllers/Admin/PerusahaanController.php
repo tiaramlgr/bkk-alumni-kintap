@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Company; // Pastikan ini sesuai dengan nama Model database Anda
+use App\Models\Company; 
 use Illuminate\Http\Request;
 
 class PerusahaanController extends Controller

@@ -1,44 +1,89 @@
-@extends('layouts.admin')
+@extends('layouts.perusahaan')
 
-@section('title', 'Edit Kategori Lowongan')
+@section('title', 'Edit Lowongan Kerja')
 
 @section('content')
-<div class="max-w-2xl mx-auto space-y-6">
-    <a href="{{ route('admin.kategori-lowongan.index') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition">
-        <i class="fas fa-arrow-left text-xs"></i> Kembali ke Daftar Kategori
-    </a>
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{{ route('perusahaan.lowongan.index') }}" class="text-slate-500 hover:text-emerald-600 transition" title="Kembali">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </a>
+        <h1 class="text-3xl font-bold text-slate-800">Edit Lowongan Kerja</h1>
+    </div>
 
-    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
-        <div class="mb-6">
-            <h2 class="text-2xl font-bold text-slate-900">Edit Kategori Lowongan</h2>
-            <p class="text-sm text-slate-500 mt-1">Perbarui klasterisasi kategori industri untuk bursa kerja</p>
+    <form method="POST" action="{{ route('perusahaan.lowongan.update', $lowongan->id) }}" enctype="multipart/form-data" class="bg-white rounded-3xl shadow p-8">
+        @csrf
+        @method('PUT')
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="col-span-2">
+                <label class="block text-sm font-medium mb-2">Judul Lowongan</label>
+                <input type="text" name="judul_lowongan" value="{{ old('judul_lowongan', $lowongan->judul_lowongan) }}" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Lokasi</label>
+                <input type="text" name="lokasi" value="{{ old('lokasi', $lowongan->lokasi) }}" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Tipe Pekerjaan</label>
+                <select name="tipe_pekerjaan" required class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+                    <option value="full_time" {{ old('tipe_pekerjaan', $lowongan->tipe_pekerjaan) == 'full_time' ? 'selected' : '' }}>Full Time</option>
+                    <option value="part_time" {{ old('tipe_pekerjaan', $lowongan->tipe_pekerjaan) == 'part_time' ? 'selected' : '' }}>Part Time</option>
+                    <option value="magang" {{ old('tipe_pekerjaan', $lowongan->tipe_pekerjaan) == 'magang' ? 'selected' : '' }}>Magang</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Kategori</label>
+                <select name="kategori_id" required class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+                    <option value="">Pilih Kategori</option>
+                    @foreach($kategoris as $kat)
+                        <option value="{{ $kat->id }}" {{ old('kategori_id', $lowongan->kategori_id) == $kat->id ? 'selected' : '' }}>
+                            {{ $kat->nama_kategori }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Deadline</label>
+                <input type="date" name="deadline" value="{{ old('deadline', optional($lowongan->deadline)->format('Y-m-d')) }}" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+            </div>
+
+            <div class="col-span-2">
+                <label class="block text-sm font-medium mb-2">Deskripsi Pekerjaan</label>
+                <textarea name="deskripsi" rows="5" required class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition">{{ old('deskripsi', $lowongan->deskripsi) }}</textarea>
+            </div>
+
+            <div class="col-span-2">
+                <label class="block text-sm font-medium mb-2">Kualifikasi</label>
+                <textarea name="kualifikasi" rows="4" required class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition">{{ old('kualifikasi', $lowongan->kualifikasi) }}</textarea>
+            </div>
+
+            <div class="col-span-2 bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-6 mt-2">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Poster / Banner Lowongan (Opsional)</label>
+                
+                @if($lowongan->foto)
+                    <div class="mb-4">
+                        <p class="text-xs text-slate-500 mb-2">Poster saat ini:</p>
+                        <img src="{{ asset('storage/' . $lowongan->foto) }}" alt="Poster Lowongan" class="h-40 rounded-xl object-cover shadow-sm border border-slate-200">
+                    </div>
+                @endif
+                
+                <input type="file" name="foto" accept="image/png, image/jpeg, image/jpg" 
+                       class="w-full px-4 py-3 border border-white rounded-xl bg-white cursor-pointer shadow-sm">
+                <p class="text-xs text-slate-500 mt-2 font-medium"><i class="fas fa-info-circle text-emerald-500"></i> Biarkan kosong jika tidak ingin mengubah poster. Format: JPG, PNG. Maksimal 2MB.</p>
+            </div>
         </div>
 
-        <form method="POST" action="{{ route('admin.kategori-lowongan.update', $kategori->id) }}" class="space-y-6">
-            @csrf
-            @method('PUT')
-
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Nama Kategori Pekerjaan</label>
-                <input type="text" name="nama_kategori" value="{{ old('nama_kategori', $kategori->nama_kategori) }}" required 
-                       class="w-full px-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 @error('nama_kategori') border-rose-500 @enderror">
-                @error('nama_kategori') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Class Icon FontAwesome (Opsional)</label>
-                <div class="flex gap-4 items-center">
-                    <i class="{{ $kategori->icon ?? 'fas fa-briefcase' }} text-blue-600 bg-blue-50 p-3 rounded-xl text-xl w-12 text-center" id="icon-preview"></i>
-                    <input type="text" name="icon" value="{{ old('icon', $kategori->icon) }}" 
-                           class="flex-1 px-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500" placeholder="Contoh: fas fa-briefcase">
-                </div>
-                <p class="text-xs text-slate-400 mt-2">Cari ikon di: fontawesome.com/icons</p>
-            </div>
-
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all">
-                Simpan Perubahan
-            </button>
-        </form>
-    </div>
+        <button type="submit" class="mt-8 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-emerald-600/30">
+            SIMPAN PERUBAHAN LOWONGAN
+        </button>
+    </form>
 </div>
 @endsection

@@ -46,8 +46,7 @@ class PerusahaanRegisterController extends Controller
             'user_id'         => $user->id,
             'nama_perusahaan' => $request->nama_perusahaan,
             'no_hp_wa'        => $request->no_hp_wa,
-            // Jika Anda menambahkan kolom email_kantor di tabel companies, uncomment baris di bawah:
-            // 'email_kantor' => $request->email,
+            'email_kantor' => $request->email,
             'alamat'          => $request->alamat,
         ]);
 

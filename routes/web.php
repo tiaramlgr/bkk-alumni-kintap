@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LandingController;
 
 // ================= AUTH CONTROLLERS =================
 use App\Http\Controllers\Auth\LoginController;
@@ -29,12 +30,18 @@ use App\Http\Controllers\Alumni\TracerStudyController as AlumniTracerController;
 
 // =============== PERUSAHAAN CONTROLLERS ===============
 use App\Http\Controllers\Perusahaan\LamaranController as PerusahaanLamaranController;
+use App\Http\Controllers\Perusahaan\DashboardController;
 
 
 // ==================== PUBLIC ROUTES ====================
 Route::get('/', function () {
     return view('welcome');
-})->name('home');
+});
+// Halaman Depan
+Route::get('/', [LandingController::class, 'index'])->name('landing.index');
+
+// Rute Download PDF (Bisa diakses publik tanpa login)
+Route::get('/pengumuman/cetak-pdf', [LandingController::class, 'cetakPdf'])->name('pengumuman.pdf');
 
 // ==================== AUTH UMUM (LOGIN) ====================
 // Kita buat rute login ini fleksibel untuk siapa saja
@@ -59,12 +66,10 @@ Route::get('/register/step2', [RegisterStepController::class, 'showStep2'])->nam
 Route::post('/register/step2', [RegisterStepController::class, 'processStep2'])->name('register.step2.post');
 Route::get('/register/success', fn() => view('auth.register-success'))->name('register.success');
 
-// ==================== PERUSAHAAN ROUTES ====================
+// ====================== PERUSAHAAN ======================
 Route::prefix('perusahaan')->name('perusahaan.')->group(function () {
     Route::get('/register', [PerusahaanRegisterController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [PerusahaanRegisterController::class, 'register'])->name('register.submit');
-    
-    // Perusahaan disarankan login lewat /login (umum), tapi kita biarkan ini jika ada link khusus
     Route::get('/login', [PerusahaanLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [PerusahaanLoginController::class, 'login'])->name('login.post');
     Route::post('/logout', [PerusahaanLoginController::class, 'logout'])->name('logout');
@@ -80,12 +85,14 @@ Route::middleware('auth')->group(function () {
         if ($user->isAdmin()) return redirect()->route('admin.dashboard');
         if ($user->isAlumni()) return redirect()->route('alumni.dashboard');
         if ($user->isPerusahaan()) return redirect()->route('perusahaan.dashboard');
-        return redirect('/login');
+        return redirect(' home');
     })->name('dashboard');
+    Route::get('/home', fn() => redirect()->route('dashboard'))->name('home');
 
-    // ====================== PERUSAHAAN ======================
+// ==================== 2. PORTAL PERUSAHAAN (DI DALAM AUTH) ====================
     Route::prefix('perusahaan')->name('perusahaan.')->group(function () {
-        Route::get('/dashboard', fn() => view('perusahaan.dashboard'))->name('dashboard');
+        Route::get('/dashboard', [App\Http\Controllers\Perusahaan\DashboardController::class, 'index'])->name('dashboard');
+        
         Route::resource('lowongan', App\Http\Controllers\Perusahaan\LowonganController::class);
         Route::get('/lamaran', [PerusahaanLamaranController::class, 'index'])->name('lamaran.index');
         Route::get('/lamaran/{id}', [PerusahaanLamaranController::class, 'show'])->name('lamaran.show');
@@ -106,7 +113,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/alumni/{id}/reject', [AlumniController::class, 'reject'])->name('alumni.reject');
 
         Route::resource('perusahaan', \App\Http\Controllers\Admin\PerusahaanController::class);
-        // Rute Kelola Perusahaan (Tanpa fitur tambah data)
         Route::resource('perusahaan', \App\Http\Controllers\Admin\PerusahaanController::class)->except(['create', 'store']);
         Route::resource('lowongan', LowonganController::class);
         Route::get('lowongan/{id}/pelamar', [LowonganController::class, 'pelamar'])->name('lowongan.pelamar');
@@ -121,6 +127,7 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('dokumen', DokumenAlumniController::class);
         Route::resource('berita', BeritaController::class);
+        Route::resource('berita', BeritaController::class)->except(['show']);
         Route::resource('users', UserController::class);
         Route::patch('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
         

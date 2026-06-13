@@ -48,7 +48,10 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-center space-x-3 font-semibold">
+                        <a href="{{ route('perusahaan.lowongan.show', $lowongan->id) }}" class="text-blue-600 hover:text-blue-800">Lihat</a>
+                        
                         <a href="{{ route('perusahaan.lowongan.edit', $lowongan->id) }}" class="text-indigo-600 hover:text-indigo-800">Edit</a>
+                        
                         <form action="{{ route('perusahaan.lowongan.destroy', $lowongan->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus publikasi posisi pekerjaan ini?')">
                             @csrf
                             @method('DELETE')

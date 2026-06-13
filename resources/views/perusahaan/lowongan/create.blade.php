@@ -6,7 +6,7 @@
 <div class="max-w-4xl mx-auto">
     <h1 class="text-3xl font-bold mb-8">Posting Lowongan Kerja Baru</h1>
 
-    <form method="POST" action="{{ route('perusahaan.lowongan.store') }}" class="bg-white rounded-3xl shadow p-8">
+    <form method="POST" action="{{ route('perusahaan.lowongan.store') }}" enctype="multipart/form-data" class="bg-white rounded-3xl shadow p-8">
         @csrf
 
         <div class="grid grid-cols-2 gap-6">
@@ -57,6 +57,13 @@
             </div>
         </div>
 
+        <div class="col-span-2">
+            <label class="block text-sm font-medium mb-2">Poster / Banner Lowongan (Opsional)</label>
+            <input type="file" name="foto" accept="image/png, image/jpeg, image/jpg" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-slate-50 cursor-pointer">
+            <p class="text-xs text-slate-500 mt-2">*Format file: JPG, JPEG, PNG. Maksimal 2MB.</p>
+        </div>
+        
         <button type="submit" class="mt-10 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-semibold text-lg">
             POSTING LOWONGAN
         </button>

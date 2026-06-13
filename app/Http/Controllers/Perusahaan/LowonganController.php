@@ -33,43 +33,53 @@ class LowonganController extends Controller
         return view('perusahaan.lowongan.create', compact('kategoris'));
     }
 
-    /**
-     * Menyimpan data lowongan kerja baru ke database.
-     */
+// --- 1. FUNGSI STORE ---
     public function store(Request $request)
     {
         $request->validate([
-            'judul_lowongan'  => 'required|string|max:255',
-            'nama_perusahaan' => 'required|string|max:255',
-            'lokasi'          => 'required|string|max:255',
-            'tipe_pekerjaan'  => 'required|string',
-            'deskripsi'       => 'required|string',
-            'kualifikasi'     => 'required|string',
-            'deadline'        => 'required|date',
-            'kategori_id'     => 'required|exists:kategori_lowongans,id',
-            'foto'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'judul_lowongan' => 'required|string|max:255',
+            'lokasi'         => 'required|string|max:255',
+            'tipe_pekerjaan' => 'required|string|max:255',
+            'kategori_id'    => 'required|exists:kategori_lowongans,id',
+            'deskripsi'      => 'required|string',
+            'kualifikasi'    => 'required|string',
+            'deadline'       => 'required|date',
+            'foto'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Tambahan Validasi Foto
         ]);
 
-        $data = $request->only([
-            'judul_lowongan', 'nama_perusahaan', 'lokasi', 
-            'tipe_pekerjaan', 'deskripsi', 'kualifikasi', 'deadline', 'kategori_id'
-        ]);
-        
-        $data['admin_id']  = Auth::id(); // Mengikat lowongan ke user perusahaan
-        $data['status']    = 'aktif';
-        $data['siaran_wa'] = $request->has('siaran_wa');
+        $user = auth()->user();
+        $perusahaan = $user->company;
 
+        $data = [
+            'admin_id'        => $user->id,
+            'kategori_id'     => $request->kategori_id,
+            'judul_lowongan'  => $request->judul_lowongan,
+            'nama_perusahaan' => $perusahaan->nama_perusahaan ?? $user->name,
+            'lokasi'          => $request->lokasi,
+            'tipe_pekerjaan'  => $request->tipe_pekerjaan,
+            'deskripsi'       => $request->deskripsi,
+            'kualifikasi'     => $request->kualifikasi,
+            'deadline'        => $request->deadline,
+            'status'          => 'aktif', 
+            'siaran_wa'       => 0, 
+        ];
+
+        // JURUS ULTIMATE UPLOAD FOTO
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
-            $namaFoto = time() . '_' . $foto->getClientOriginalName();
-            $foto->storeAs('public/lowongan', $namaFoto);
+            $ext = $foto->getClientOriginalExtension() ?: 'png';
+            $namaFoto = 'poster_pt_' . time() . '_' . uniqid() . '.' . $ext;
+            
+            $tujuan_upload = storage_path('app/public/lowongan');
+            $foto->move($tujuan_upload, $namaFoto);
+            
             $data['foto'] = 'lowongan/' . $namaFoto;
         }
 
-        LowonganKerja::create($data);
+        \App\Models\LowonganKerja::create($data);
 
         return redirect()->route('perusahaan.lowongan.index')
-                         ->with('success', 'Lowongan kerja berhasil dipublikasikan.');
+                         ->with('success', 'Lowongan kerja dan poster berhasil dipublikasikan!');
     }
 
     /**
@@ -86,41 +96,66 @@ class LowonganController extends Controller
     /**
      * Memperbarui data lowongan kerja di database.
      */
+// --- 2. FUNGSI UPDATE ---
     public function update(Request $request, $id)
     {
         $request->validate([
-            'judul_lowongan'  => 'required|string|max:255',
-            'nama_perusahaan' => 'required|string|max:255',
-            'lokasi'          => 'required|string|max:255',
-            'tipe_pekerjaan'  => 'required|string',
-            'deskripsi'       => 'required|string',
-            'kualifikasi'     => 'required|string',
-            'deadline'        => 'required|date',
-            'kategori_id'     => 'required|exists:kategori_lowongans,id',
-            'foto'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'judul_lowongan' => 'required|string|max:255',
+            'lokasi'         => 'required|string|max:255',
+            'tipe_pekerjaan' => 'required|string|max:255',
+            'kategori_id'    => 'required|exists:kategori_lowongans,id',
+            'deskripsi'      => 'required|string',
+            'kualifikasi'    => 'required|string',
+            'deadline'       => 'required|date',
+            'foto'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Tambahan Validasi Foto
         ]);
 
-        $lowongan = LowonganKerja::where('admin_id', Auth::id())->findOrFail($id);
+        $lowongan = \App\Models\LowonganKerja::findOrFail($id);
         
         $data = $request->only([
-            'judul_lowongan', 'nama_perusahaan', 'lokasi', 
-            'tipe_pekerjaan', 'deskripsi', 'kualifikasi', 'deadline', 'kategori_id'
+            'judul_lowongan', 'lokasi', 'tipe_pekerjaan', 
+            'deskripsi', 'kualifikasi', 'deadline', 'kategori_id'
         ]);
-        $data['siaran_wa'] = $request->has('siaran_wa');
 
+        // JURUS ULTIMATE UPLOAD FOTO (TIMPA FOTO LAMA)
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
-            $namaFoto = time() . '_' . $foto->getClientOriginalName();
-            $foto->storeAs('public/lowongan', $namaFoto);
+            $ext = $foto->getClientOriginalExtension() ?: 'png';
+            $namaFoto = 'poster_pt_' . time() . '_' . uniqid() . '.' . $ext;
+            
+            $tujuan_upload = storage_path('app/public/lowongan');
+            $foto->move($tujuan_upload, $namaFoto);
+            
             $data['foto'] = 'lowongan/' . $namaFoto;
         }
 
         $lowongan->update($data);
 
         return redirect()->route('perusahaan.lowongan.index')
-                         ->with('success', 'Lowongan kerja berhasil diperbarui.');
+                         ->with('success', 'Lowongan berhasil diperbarui!');
     }
 
+    // --- 3. FUNGSI UPDATE STATUS PELAMAR ---
+    public function updateStatusLamaran(Request $request, $id)
+    {
+        $lamaran = \App\Models\Lamaran::findOrFail($id);
+        
+        $lamaran->update([
+            'status_lamaran' => $request->status_lamaran,
+            'catatan_admin'  => $request->catatan_admin // Ini bisa dipakai sebagai catatan HRD Perusahaan
+        ]);
+
+        return redirect()->back()->with('success', 'Status pelamar berhasil diperbarui menjadi ' . $request->status_lamaran);
+    }
+   
+    public function show($id)
+    {
+        // Ambil data lowongan beserta relasi kategorinya
+        $lowongan = \App\Models\LowonganKerja::with('kategori')->findOrFail($id);
+        
+        return view('perusahaan.lowongan.show', compact('lowongan'));
+    }
+    
     /**
      * Menghapus lowongan kerja milik perusahaan.
      */

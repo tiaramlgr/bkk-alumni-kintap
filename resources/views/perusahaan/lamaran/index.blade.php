@@ -25,12 +25,16 @@
                     <td class="px-6 py-4">{{ $lamaran->created_at->format('d M Y') }}</td>
                     <td class="px-6 py-4 text-center">
                         @if($lamaran->status_lamaran == 'pending')
-                            <span class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-sm">Menunggu</span>
+                            <span class="bg-yellow-100 text-yellow-800 px-4 py-1 rounded-full text-sm font-semibold">Menunggu</span>
+                        @elseif($lamaran->status_lamaran == 'direview')
+                            <span class="bg-blue-100 text-blue-800 px-4 py-1 rounded-full text-sm font-semibold">Direview</span>
                         @elseif($lamaran->status_lamaran == 'diterima')
-                            <span class="bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm">Diterima</span>
+                            <span class="bg-emerald-100 text-emerald-800 px-4 py-1 rounded-full text-sm font-semibold">Diterima</span>
+                        @elseif($lamaran->status_lamaran == 'ditolak')
+                            <span class="bg-rose-100 text-rose-800 px-4 py-1 rounded-full text-sm font-semibold">Ditolak</span>
                         @else
-                            <span class="bg-red-100 text-red-700 px-4 py-1 rounded-full text-sm">Ditolak</span>
-                        @endif
+                            <span class="bg-slate-100 text-slate-800 px-4 py-1 rounded-full text-sm font-semibold">{{ ucfirst($lamaran->status_lamaran) }}</span>
+                        @endif                    
                     </td>
                     <td class="px-6 py-4 text-center">
                         <a href="{{ route('perusahaan.lamaran.show', $lamaran->id) }}" 

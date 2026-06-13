@@ -49,10 +49,15 @@ class LowonganController extends Controller
         $data['status'] = 'aktif';
         $data['siaran_wa'] = $request->has('siaran_wa');
 
+        // JURUS ULTIMATE: Bypass Flysystem, gunakan move() langsung
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
-            $namaFoto = time() . '_' . str_replace(' ', '_', $foto->getClientOriginalName());
-            $foto->storeAs('public/lowongan', $namaFoto);
+            $ext = $foto->getClientOriginalExtension() ?: 'png';
+            $namaFoto = 'foto_' . time() . '_' . uniqid() . '.' . $ext;
+            
+            $tujuan_upload = storage_path('app/public/lowongan');
+            $foto->move($tujuan_upload, $namaFoto);
+            
             $data['foto'] = 'lowongan/' . $namaFoto;
         }
 
@@ -98,17 +103,22 @@ class LowonganController extends Controller
         ]);
         $data['siaran_wa'] = $request->has('siaran_wa');
 
+        // JURUS ULTIMATE: Bypass Flysystem, gunakan move() langsung
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
-            $namaFoto = time() . '_' . str_replace(' ', '_', $foto->getClientOriginalName());
-            $foto->storeAs('public/lowongan', $namaFoto);
+            $ext = $foto->getClientOriginalExtension() ?: 'png';
+            $namaFoto = 'foto_' . time() . '_' . uniqid() . '.' . $ext;
+            
+            $tujuan_upload = storage_path('app/public/lowongan');
+            $foto->move($tujuan_upload, $namaFoto);
+            
             $data['foto'] = 'lowongan/' . $namaFoto;
         }
 
         $lowongan->update($data);
 
-        return redirect()->route('admin.lowongan.index')
-                         ->with('success', 'Lowongan berhasil diperbarui!');
+        return redirect()->route('perusahaan.lowongan.index')
+                         ->with('success', 'Sip! Data lowongan kerja berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -137,7 +147,7 @@ class LowonganController extends Controller
         return view('admin.lowongan.pelamar', compact('lowongan', 'lamarans'));
     }
 
-public function updateStatusLamaran(Request $request, $id)
+    public function updateStatusLamaran(Request $request, $id)
     {
         $lamaran = \App\Models\Lamaran::findOrFail($id);
         

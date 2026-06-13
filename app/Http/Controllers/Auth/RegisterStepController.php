@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Alumni;
+use App\Models\Jurusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -38,42 +39,46 @@ class RegisterStepController extends Controller
 
     public function processStep2(Request $request)
     {
-        $data = $request->session()->get('register_data');
+    $data = $request->session()->get('register_data');
 
-        $request->validate([
-            'name'          => 'required|string|max:255',
-            'nisn'          => 'required|string|unique:alumnis,nisn',
-            'tahun_lulus'   => 'required|digits:4',
-            'no_hp_wa'      => 'required|string',
-            'jurusan_id'    => 'required|exists:jurusans,id',
-        ], [
-            'nisn.unique' => 'NISN ini sudah terdaftar di sistem. Silakan login atau hubungi Admin BKK jika lupa password.',
-        ]);
+    $request->validate([
+        'name'        => 'required|string|max:255',
+        'nisn'        => 'required|string|unique:alumnis,nisn',
+        'tahun_lulus' => 'required|digits:4',
+        'no_hp_wa'    => 'required|string',
+        'jurusan'     => 'required|string|max:255', 
+    ]);
 
-        // Buat User
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $data['email'],
-            'password' => $data['password'],
-            'role' => 'alumni',
-            'is_active' => false,
-        ]);
+    // 1. CARI ID JURUSAN BERDASARKAN TEKS YANG DIKETIK
+    // Kita cari nama_kompetensi yang sama dengan teks inputan
+    $jurusanData = Jurusan::where('nama_kompetensi', $request->jurusan)->first();
 
-        // Buat Profil Alumni
-        Alumni::create([
-            'user_id' => $user->id,
-            'jurusan_id' => $request->jurusan_id,
-            'nisn' => $request->nisn,
-            'tahun_lulus' => $request->tahun_lulus,
-            'no_hp_wa' => $request->no_hp_wa,
-            'status_akun' => 'pending',
-        ]);
+    // 2. Buat User
+    $user = User::create([
+        'name'      => $request->name,
+        'email'     => $data['email'],
+        'password'  => $data['password'],
+        'role'      => 'alumni',
+        'is_active' => false,
+    ]);
 
-        $request->session()->forget('register_data');
+    // 3. Buat Profil Alumni
+    Alumni::create([
+        'user_id'     => $user->id,
+        'nisn'        => $request->nisn,
+        'tahun_lulus' => $request->tahun_lulus,
+        'no_hp_wa'    => $request->no_hp_wa,
+        'status_akun' => 'pending',
+        // Jika input jurusan ditemukan, simpan ID-nya ke jurusan_id
+        'jurusan_id'  => $jurusanData ? $jurusanData->id : null, 
+        // Jika Anda tetap ingin menyimpan teksnya, simpan juga di kolom jurusan (jika ada)
+        'jurusan'     => $request->jurusan, 
+    ]);
 
-        Auth::login($user);
+    $request->session()->forget('register_data');
+    Auth::login($user);
 
-        return redirect()->route('register.success')
-            ->with('success', 'Registrasi berhasil! Akun Anda menunggu persetujuan Admin BKK.');
+    return redirect()->route('register.success')
+        ->with('success', 'Registrasi berhasil! Akun Anda menunggu persetujuan Admin.');
     }
 }

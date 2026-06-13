@@ -92,7 +92,7 @@
             </div>
 
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all text-lg mt-4">
-                <i class="fas fa-paper-plane mr-2"></i> Publikasikan Lowongan
+                <i class="fas fa-paper-plane mr-2"></i>Tambah Lowongan
             </button>
         </form>
     </div>

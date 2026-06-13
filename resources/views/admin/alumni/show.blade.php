@@ -31,7 +31,6 @@
                 <div><span class="text-slate-500 block">NISN</span><span class="font-semibold text-slate-900">{{ $alumni->nisn ?? '-' }}</span></div>
                 <div><span class="text-slate-500 block">Kompetensi Keahlian</span><span class="font-semibold text-slate-900">{{ $alumni->jurusan->nama_kompetensi ?? '-' }}</span></div>
                 <div><span class="text-slate-500 block">Tahun Lulus</span><span class="font-semibold text-slate-900">{{ $alumni->tahun_lulus ?? '-' }}</span></div>
-                <div><span class="text-slate-500 block">No. Ijazah</span><span class="font-semibold text-slate-900">{{ $alumni->no_ijazah ?? '-' }}</span></div>
             </div>
 
             <div class="space-y-4">

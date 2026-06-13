@@ -31,12 +31,16 @@ class LamaranController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $lamaran = Lamaran::findOrFail($id);
+
         $lamaran->update([
-            'status_lamaran' => $request->status,
-            'catatan_admin' => $request->catatan ?? null,
+            // Ubah $request->status menjadi $request->status_lamaran
+            'status_lamaran' => $request->status_lamaran,
+            
+            // Ubah $request->catatan menjadi $request->catatan_admin
+            'catatan_admin'  => $request->catatan_admin ?? null,
         ]);
 
         return redirect()->route('perusahaan.lamaran.index')
-            ->with('success', 'Status lamaran berhasil diperbarui.');
+                        ->with('success', 'Status pelamar berhasil diperbarui!');
     }
 }

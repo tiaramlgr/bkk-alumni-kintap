@@ -7,6 +7,7 @@ use App\Models\Berita;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 
 class BeritaController extends Controller
 {
@@ -24,39 +25,41 @@ class BeritaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'judul'   => 'required|string|max:255',
-            'konten'  => 'required|string',
-            'foto'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'status'  => 'required|in:draft,published',
+            'judul'  => 'required|string|max:255',
+            'konten' => 'required|string',
+            'foto'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'status' => 'required|in:draft,published',
         ]);
 
         $data = [
-            'admin_id'  => auth::id(),
-            'judul'     => $request->judul,
-            'slug'      => Str::slug($request->judul) . '-' . time(),
-            'konten'    => $request->konten,
-            'status'    => $request->status,
+            'admin_id' => Auth::id(),
+            'judul'    => $request->judul,
+            'slug'     => Str::slug($request->judul) . '-' . time(),
+            'konten'   => $request->konten,
+            'status'   => $request->status,
         ];
 
+        // Jurus Upload Aman
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
-            $namaFoto = time() . '_' . $foto->getClientOriginalName();
-            $foto->storeAs('public/berita', $namaFoto);
+            $namaFoto = 'berita_' . time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+            $foto->move(storage_path('app/public/berita'), $namaFoto);
             $data['foto'] = 'berita/' . $namaFoto;
         }
 
         Berita::create($data);
-
-        return redirect()->route('admin.berita.index')
-                         ->with('success', 'Berita berhasil ditambahkan!');
+        return redirect()->route('admin.berita.index')->with('success', 'Berita berhasil ditambahkan!');
     }
 
     public function show($id)
     {
+        // Mencari berita berdasarkan ID, jika tidak ketemu akan memunculkan error 404
         $berita = Berita::with('admin')->findOrFail($id);
+        
+        // Mengembalikan tampilan detail berita
         return view('admin.berita.show', compact('berita'));
     }
-
+    
     public function edit($id)
     {
         $berita = Berita::findOrFail($id);
@@ -66,39 +69,38 @@ class BeritaController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'judul'   => 'required|string|max:255',
-            'konten'  => 'required|string',
-            'foto'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'status'  => 'required|in:draft,published',
+            'judul'  => 'required|string|max:255',
+            'konten' => 'required|string',
+            'foto'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'status' => 'required|in:draft,published',
         ]);
 
         $berita = Berita::findOrFail($id);
-
-        $data = [
-            'judul'  => $request->judul,
-            'konten' => $request->konten,
-            'status' => $request->status,
-        ];
+        $data = $request->only(['judul', 'konten', 'status']);
 
         if ($request->hasFile('foto')) {
+            // Hapus foto lama
+            if ($berita->foto && File::exists(storage_path('app/public/' . $berita->foto))) {
+                File::delete(storage_path('app/public/' . $berita->foto));
+            }
+
             $foto = $request->file('foto');
-            $namaFoto = time() . '_' . $foto->getClientOriginalName();
-            $foto->storeAs('public/berita', $namaFoto);
+            $namaFoto = 'berita_' . time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+            $foto->move(storage_path('app/public/berita'), $namaFoto);
             $data['foto'] = 'berita/' . $namaFoto;
         }
 
         $berita->update($data);
-
-        return redirect()->route('admin.berita.index')
-                         ->with('success', 'Berita berhasil diperbarui!');
+        return redirect()->route('admin.berita.index')->with('success', 'Berita berhasil diperbarui!');
     }
 
     public function destroy($id)
     {
         $berita = Berita::findOrFail($id);
+        if ($berita->foto && File::exists(storage_path('app/public/' . $berita->foto))) {
+            File::delete(storage_path('app/public/' . $berita->foto));
+        }
         $berita->delete();
-
-        return redirect()->route('admin.berita.index')
-                         ->with('success', 'Berita berhasil dihapus!');
+        return redirect()->route('admin.berita.index')->with('success', 'Berita berhasil dihapus!');
     }
 }

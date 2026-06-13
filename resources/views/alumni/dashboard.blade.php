@@ -18,14 +18,14 @@
             <h2 class="text-3xl font-bold mb-3">Pusat Informasi & Lowongan Kerja Terkini</h2>
             
             <p class="text-green-50 text-base leading-relaxed mb-6">
-                Jangan sampai terlewat info penting! Bergabunglah sekarang ke Saluran WhatsApp BKK SMKN Kintap untuk mendapatkan  notifikasi lowongan pekerjaan terbaru, info rekrutmen, dan pemanggilan *interview* langsung di HP Anda.
+                Jangan sampai terlewat info penting! Bergabunglah sekarang ke Saluran WhatsApp BKK SMKN Kintap untuk mendapatkan  notifikasi lowongan pekerjaan terbaru, info rekrutmen, dan pemanggilan interview langsung di HP Anda.
             </p>
             
             <div class="flex flex-wrap items-center gap-4">
-                <a href="https://whatsapp.com/channel/0029Vb8WY1QEgGfKFQZ6tc20"
+                <a href="https://chat.whatsapp.com/GbwBrGkgmxTLGtjyLqzwfr"
                 target="_blank" 
                 class="bg-white text-emerald-800 hover:bg-green-50 px-8 py-3.5 rounded-2xl font-bold transition-all shadow-lg flex items-center gap-3 transform hover:-translate-y-1">
-                    <i class="fab fa-whatsapp text-xl"></i> Gabung ke Saluran WhatsApp
+                    <i class="fab fa-whatsapp text-xl"></i> Gabung ke Grup WhatsApp
                 </a>
                 
                 <span class="text-sm text-green-100/80 flex items-center gap-2">

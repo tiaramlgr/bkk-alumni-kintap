@@ -9,7 +9,6 @@ class Jurusan extends Model
 {
     use HasFactory;
 
-    // Sesuaikan dengan kolom di bkk_alumni_kintap.sql
     protected $fillable = [
         'nama_kompetensi',
         'nama_program',

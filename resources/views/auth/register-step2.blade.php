@@ -58,15 +58,8 @@
 
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Jurusan / Kompetensi Keahlian <span class="text-red-500">*</span></label>
-                        <select name="jurusan_id" required 
-                                class="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-600 outline-none transition-all bg-slate-50 hover:bg-white text-slate-700 appearance-none">
-                            <option value="">-- Pilih Jurusan Anda --</option>
-                            @foreach(\App\Models\Jurusan::where('is_active', true)->get() as $jurusan)
-                                <option value="{{ $jurusan->id }}" {{ old('jurusan_id') == $jurusan->id ? 'selected' : '' }}>
-                                    {{ $jurusan->nama_kompetensi }} ({{ $jurusan->kode_jurusan }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <input type="text" name="jurusan" value="{{ old('jurusan') }}" required placeholder="Misal Teknik Komputer dan Jaringan"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-600 outline-none transition-all bg-slate-50 hover:bg-white text-slate-700">
                     </div>
 
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold py-4 rounded-2xl transition-all mt-6 shadow-lg shadow-indigo-600/30 flex justify-center items-center gap-2">

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('no_hp_wa');
             $table->string('email_kantor')->nullable();
             $table->text('deskripsi')->nullable();
+            $table->text('sektor_industri')->nullable();
             $table->string('status')->default('active');
             $table->timestamps();
         });
