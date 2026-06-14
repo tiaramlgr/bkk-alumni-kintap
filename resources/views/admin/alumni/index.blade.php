@@ -27,6 +27,27 @@
         </div>
     @endif
 
+    <!-- ========================================== -->
+    <!-- FORM IMPORT CSV TUGAS AKHIR                -->
+    <!-- ========================================== -->
+    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Import Data Alumni (CSV)</h3>
+            <p class="text-xs text-slate-500 mt-1">Unggah file tracer study SMK N Kintap (.csv) untuk memasukkan data secara massal.</p>
+        </div>
+        
+        <form action="{{ route('admin.alumni.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-3 w-full md:w-auto">
+            @csrf
+            <input type="file" name="file_csv" accept=".csv" required 
+                   class="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition w-full md:w-auto">
+            
+            <button type="submit" class="bg-emerald-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-emerald-700 transition shadow-md shadow-emerald-500/30 flex items-center gap-2 whitespace-nowrap">
+                <i class="fas fa-file-import"></i> Import CSV
+            </button>
+        </form>
+    </div>
+    <!-- ========================================== -->
+
     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
         <form action="{{ route('admin.alumni.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div>

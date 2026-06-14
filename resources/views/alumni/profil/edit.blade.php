@@ -30,7 +30,8 @@
             <i class="fas fa-check-circle text-lg"></i> {{ session('success') }}
         </div>
     @endif
-    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 mb-8">
         <form action="{{ route('alumni.profil.update') }}" method="POST">
             @csrf
             @method('PUT')
@@ -131,6 +132,42 @@
                 <button type="submit" 
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold text-lg transition shadow-lg shadow-blue-500/30 flex items-center justify-center gap-3 transform hover:-translate-y-1">
                     <i class="fas fa-save text-xl"></i> Simpan Perubahan Profil
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+        <form action="{{ route('alumni.profil.password.update') }}" method="POST">
+            @csrf
+            @method('PUT')
+            
+            <h3 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2 mb-6">Keamanan & Ganti Password</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Password Saat Ini <span class="text-red-500">*</span></label>
+                    <input type="password" name="current_password" required
+                           class="w-full px-4 py-3 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Password Baru <span class="text-red-500">*</span></label>
+                    <input type="password" name="password" required placeholder="Minimal 8 karakter"
+                           class="w-full px-4 py-3 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Ketik Ulang Password Baru <span class="text-red-500">*</span></label>
+                    <input type="password" name="password_confirmation" required placeholder="Ulangi password baru"
+                           class="w-full px-4 py-3 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <button type="submit" 
+                        class="w-full bg-slate-800 hover:bg-slate-900 text-white py-4 rounded-2xl font-bold text-lg transition shadow-lg flex items-center justify-center gap-3">
+                    <i class="fas fa-lock"></i> Perbarui Password
                 </button>
             </div>
         </form>

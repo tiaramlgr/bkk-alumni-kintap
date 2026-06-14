@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Alumni;
 use App\Models\Jurusan;
 use Illuminate\Http\Request;
+use App\Imports\AlumniImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AlumniController extends Controller
 {
@@ -135,5 +137,127 @@ class AlumniController extends Controller
         $alumni->delete();
 
         return redirect()->route('admin.alumni.index')->with('success', 'Akun dan data alumni berhasil dihapus secara permanen.');
+    }
+
+    /**
+     * Import Data Alumni dari file CSV 
+     */
+    public function importCsv(Request $request)
+    {
+        $request->validate(['file_csv' => 'required']);
+        $file = $request->file('file_csv');
+
+        // Pindahkan file untuk mencegah diblokir Windows
+        $nama_file = time() . '_import.csv';
+        $tujuan_upload = storage_path('app/public');
+        $file->move($tujuan_upload, $nama_file);
+        $path_aman = $tujuan_upload . '/' . $nama_file;
+
+        if (($handle = fopen($path_aman, 'r')) !== false) {
+            
+            // 1. Deteksi Pemisah (Koma atau Titik Koma) Otomatis
+            $firstLine = fgets($handle);
+            $delimiter = (substr_count($firstLine, ';') > substr_count($firstLine, ',')) ? ';' : ',';
+            rewind($handle);
+
+            // 2. Cari Baris Judul (Header)
+            $header = [];
+            while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
+                $rowStr = strtolower(implode('', $row));
+                // Jika baris ini memiliki kata 'nama', anggap ini adalah baris judul kolom
+                if (strpos($rowStr, 'nama') !== false) {
+                    $header = array_map('trim', array_map('strtolower', $row));
+                    break;
+                }
+            }
+
+            if (empty($header)) {
+                fclose($handle);
+                @unlink($path_aman);
+                return redirect()->back()->with('error', 'Gagal menemukan judul kolom. Pastikan ada kolom NAMA ALUMNI atau NAMA LENGKAP.');
+            }
+
+            // 3. Pencarian Posisi Kolom Otomatis (Auto-Map)
+            $idx_nama = -1; $idx_nisn = -1; $idx_nohp = -1; $idx_email = -1; $idx_tahun = -1;
+
+            foreach ($header as $i => $col) {
+                // Kenali variasi penamaan kolom dari berbagai tahun file Anda
+                if ($col === 'nama' || $col === 'nama alumni' || $col === 'nama lengkap') $idx_nama = $i;
+                if ($col === 'nisn') $idx_nisn = $i;
+                if ($col === 'no. hp' || $col === 'no hp' || str_contains($col, 'hp')) $idx_nohp = $i;
+                if ($col === 'email' || $col === 'e-mail') $idx_email = $i;
+                if ($col === 'tahun lulus' || str_contains($col, 'tahun')) $idx_tahun = $i;
+            }
+
+            // Jika masih gagal menemukan kolom nama
+            if ($idx_nama === -1) {
+                fclose($handle);
+                @unlink($path_aman);
+                return redirect()->back()->with('error', 'Sistem tidak bisa menemukan kolom Nama. Cek nama kolom di CSV Anda.');
+            }
+
+            $berhasil = 0;
+
+            // 4. Proses Input Data dengan Cerdas
+            while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
+                // Lewati jika nama kosong
+                if (!isset($row[$idx_nama]) || trim($row[$idx_nama]) === '') {
+                    continue;
+                }
+
+                $nama_lengkap = trim($row[$idx_nama]);
+
+                // Ekstrak data HANYA JIKA kolomnya ada di file tersebut
+                $nisn_asli    = ($idx_nisn !== -1 && isset($row[$idx_nisn])) ? trim($row[$idx_nisn]) : '';
+                $no_hp        = ($idx_nohp !== -1 && isset($row[$idx_nohp])) ? trim($row[$idx_nohp]) : '';
+                $email_asli   = ($idx_email !== -1 && isset($row[$idx_email])) ? trim($row[$idx_email]) : '';
+                $tahun_lulus  = ($idx_tahun !== -1 && isset($row[$idx_tahun])) ? trim($row[$idx_tahun]) : '';
+
+                // Buat NISN Acak HANYA jika file (seperti tahun 2021-2024) tidak memiliki kolom NISN
+                $nisn = ($nisn_asli !== '' && $nisn_asli !== '-') ? $nisn_asli : 'ALM' . rand(100000, 999999);
+
+                // Buat Email Unik untuk akun yang tidak ada email / format emailnya rusak
+                if ($email_asli === '' || $email_asli === '-' || !filter_var($email_asli, FILTER_VALIDATE_EMAIL)) {
+                    $email = 'alumni_' . $nisn . '_' . rand(10, 99) . '@alumni.com';
+                } else {
+                    $email = $email_asli;
+                }
+
+                try {
+                    $user = \App\Models\User::firstOrCreate(
+                        ['email' => $email],
+                        [
+                            'name'     => $nama_lengkap,
+                            'password' => bcrypt('password123'),
+                            'role'     => 'alumni'
+                        ]
+                    );
+
+                    \App\Models\Alumni::updateOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'nisn'            => $nisn,
+                            'tahun_lulus'     => $tahun_lulus,
+                            'no_hp_wa'        => $no_hp,
+                            'is_subscribe_wa' => true,
+                            'status_akun'     => 'approved',
+                            'kategori_id'     => 1, // Default Kompetensi Keahlian
+                        ]
+                    );
+
+                    $berhasil++;
+                } catch (\Exception $e) {
+                    continue; // Jika ada baris yang cacat, lewati dan lanjut ke baris berikutnya
+                }
+            }
+            fclose($handle);
+            @unlink($path_aman);
+        }
+
+        if ($berhasil == 0) {
+            return redirect()->back()->with('error', 'Sistem gagal membaca baris data. Pastikan format CSV sudah benar.');
+        }
+
+        return redirect()->back()->with('success', "Hebat! $berhasil data alumni berhasil diimpor menggunakan fitur Pencarian Kolom Otomatis.");
     }
 }

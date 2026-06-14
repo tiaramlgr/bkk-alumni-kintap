@@ -134,6 +134,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/export/alumni', [ExportController::class, 'alumni'])->name('export.alumni');
         Route::get('/export/tracer-study', [ExportController::class, 'tracerStudy'])->name('export.tracer');
         Route::get('/export/lowongan', [ExportController::class, 'lowongan'])->name('export.lowongan');
+
     });
     
     // ====================== ALUMNI ======================
@@ -158,5 +159,11 @@ Route::middleware('auth')->group(function () {
         // Contoh rute untuk tracer study
         Route::get('/alumni/tracer-study/edit', [AlumniTracerController::class, 'edit'])->name('alumni.tracer-study.edit');
         Route::put('/tracer-study', [AlumniTracerController::class, 'update'])->name('tracer.update');
+        Route::put('/profil/password', [\App\Http\Controllers\Alumni\ProfilController::class, 'updatePassword'])->name('profil.password.update');
     });
 });
+
+// ROUTE IMPORT CSV TUGAS AKHIR
+Route::post('/admin/alumni/import', [\App\Http\Controllers\Admin\AlumniController::class, 'importCsv'])
+    ->middleware('auth')
+    ->name('admin.alumni.import');
