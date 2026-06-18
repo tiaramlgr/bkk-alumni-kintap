@@ -3,7 +3,7 @@
 @section('title', 'Dashboard Perusahaan')
 
 @section('content')
-<div class="space-y-8">
+{{--<div class="space-y-8">
     <div class="bg-gradient-to-br from-green-500 to-emerald-700 rounded-3xl p-8 text-white shadow-xl shadow-green-500/20 relative overflow-hidden mb-8">
         
         <div class="absolute -right-6 -bottom-6 opacity-10">
@@ -33,7 +33,7 @@
                 </span>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <div class="flex justify-between items-center">
         <div>

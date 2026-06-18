@@ -142,7 +142,7 @@ class AlumniController extends Controller
     /**
      * Import Data Alumni dari file CSV 
      */
-    public function importCsv(Request $request)
+     public function importCsv(Request $request)
     {
         $request->validate(['file_csv' => 'required']);
         $file = $request->file('file_csv');
