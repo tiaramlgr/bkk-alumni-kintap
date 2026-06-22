@@ -17,7 +17,7 @@ class DokumenAlumni extends Model
         'path_file',
         'file_dokumen',
         'tahun_dokumen',
-        'is_active', // Ini untuk Admin
+        'is_active', 
         'status_verifikasi', // Baru: 'pending', 'approved', 'rejected'
     ];
 

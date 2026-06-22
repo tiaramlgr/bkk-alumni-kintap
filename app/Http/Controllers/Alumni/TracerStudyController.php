@@ -38,7 +38,6 @@ class TracerStudyController extends Controller
         TracerStudy::create([
             'alumni_id' => Auth::user()->alumni->id,
             'status_pekerjaan' => $request->status_pekerjaan,
-            // Tambahkan kolom lainnya...
         ]);
 
         return redirect()->route('alumni.tracer.index')->with('success', 'Data Tracer Study berhasil disimpan.');

@@ -39,7 +39,6 @@ class BeritaController extends Controller
             'status'   => $request->status,
         ];
 
-        // Jurus Upload Aman
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
             $namaFoto = 'berita_' . time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
@@ -53,10 +52,7 @@ class BeritaController extends Controller
 
     public function show($id)
     {
-        // Mencari berita berdasarkan ID, jika tidak ketemu akan memunculkan error 404
         $berita = Berita::with('admin')->findOrFail($id);
-        
-        // Mengembalikan tampilan detail berita
         return view('admin.berita.show', compact('berita'));
     }
     
@@ -79,7 +75,6 @@ class BeritaController extends Controller
         $data = $request->only(['judul', 'konten', 'status']);
 
         if ($request->hasFile('foto')) {
-            // Hapus foto lama
             if ($berita->foto && File::exists(storage_path('app/public/' . $berita->foto))) {
                 File::delete(storage_path('app/public/' . $berita->foto));
             }

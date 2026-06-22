@@ -39,6 +39,18 @@
                 @enderror
             </div>
 
+            <!-- FIELD STATUS BERITA DITAMBAHKAN DI SINI -->
+            <div>
+                <label class="block font-semibold text-slate-800 mb-2">Status Berita</label>
+                <select name="status" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <option value="draft" {{ old('status', $berita->status) == 'draft' ? 'selected' : '' }}>Draft</option>
+                    <option value="published" {{ old('status', $berita->status) == 'published' ? 'selected' : '' }}>Published</option>
+                </select>
+                @error('status')
+                    <span class="text-rose-500 text-sm mt-1 block">{{ $message }}</span>
+                @enderror
+            </div>
+
             <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                 <label class="block font-semibold text-slate-800 mb-4">Foto / Thumbnail Berita</label>
                 
