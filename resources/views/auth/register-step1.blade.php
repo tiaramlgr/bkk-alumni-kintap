@@ -39,8 +39,23 @@
                     
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">NISN <span class="text-red-500">*</span></label>
-                        <input type="text" name="nisn" value="{{ old('nisn') }}" required 
-                               class="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-600 outline-none transition-all bg-slate-50 hover:bg-white">
+                        <input type="text" name="nisn" value="{{ old('nisn') }}" required
+                               maxlength="20" placeholder="Masukkan 10 digit NISN Anda"
+                               class="w-full px-5 py-3.5 rounded-2xl border @error('nisn') border-red-400 bg-red-50 @else border-slate-200 bg-slate-50 @enderror focus:ring-2 focus:ring-blue-600 outline-none transition-all hover:bg-white">
+                        {{-- Pesan error khusus NISN --}}
+                        @error('nisn')
+                            <div class="mt-2 flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm">
+                                <i class="fas fa-shield-alt mt-0.5 flex-shrink-0"></i>
+                                <span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                        {{-- Info: portal ini khusus alumni SMKN Kintap --}}
+                        @unless($errors->has('nisn'))
+                            <p class="mt-1.5 text-xs text-slate-400 flex items-center gap-1">
+                                <i class="fas fa-lock text-slate-300"></i>
+                                Portal ini khusus alumni <strong>SMKN Kintap</strong>. NISN Anda akan diverifikasi dari data arsip sekolah.
+                            </p>
+                        @endunless
                     </div>
 
                     <div>

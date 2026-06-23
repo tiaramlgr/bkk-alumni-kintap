@@ -74,6 +74,12 @@
                     <span>Activity Log</span>
                 </a>
 
+                <a href="{{ route('admin.whitelist.index') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.whitelist.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
+                    <i class="fas fa-file-excel w-5 text-center transition-transform group-hover:scale-110"></i> 
+                    <span>Whitelist</span>
+                </a>
+
                 <a href="{{ route('admin.export.alumni') }}" 
                    class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group {{ request()->routeIs('admin.export.alumni') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700 font-medium' }}">
                     <i class="fas fa-file-excel w-5 text-center transition-transform group-hover:scale-110"></i> 

@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\TracerStudyController as AdminTracerController;
 use App\Http\Controllers\Admin\PerusahaanController;
+use App\Http\Controllers\Admin\AlumniWhitelistController;
 // ================= ALUMNI CONTROLLERS =================
 use App\Http\Controllers\Alumni\LowonganController as AlumniLowonganController;
 use App\Http\Controllers\Alumni\DokumenController;
@@ -121,6 +122,16 @@ Route::middleware('auth')->group(function () {
         Route::resource('jurusan', JurusanController::class);
         Route::resource('kategori-lowongan', KategoriLowonganController::class);
         Route::resource('tracer', AdminTracerController::class);
+
+        // ===== WHITELIST NISN ALUMNI =====
+        // Kelola daftar NISN resmi alumni SMKN Kintap yang boleh mendaftar
+        Route::get('whitelist', [AlumniWhitelistController::class, 'index'])->name('whitelist.index');
+        Route::get('whitelist/create', [AlumniWhitelistController::class, 'create'])->name('whitelist.create');
+        Route::post('whitelist', [AlumniWhitelistController::class, 'store'])->name('whitelist.store');
+        Route::delete('whitelist/{whitelist}', [AlumniWhitelistController::class, 'destroy'])->name('whitelist.destroy');
+        Route::post('whitelist/import', [AlumniWhitelistController::class, 'import'])->name('whitelist.import');
+        Route::patch('whitelist/{whitelist}/reset', [AlumniWhitelistController::class, 'resetStatus'])->name('whitelist.reset');
+        // ===================================
         
         Route::post('/siaran-wa/{id}/send', [SiaranWaController::class, 'send'])->name('siaran.send');
         Route::resource('siaran-wa', SiaranWaController::class)->names('siaran');  
