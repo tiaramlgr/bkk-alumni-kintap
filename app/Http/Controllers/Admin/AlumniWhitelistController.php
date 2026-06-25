@@ -76,19 +76,16 @@ class AlumniWhitelistController extends Controller
 
         $file = $request->file('file_csv');
 
-        // Pastikan file benar-benar terupload dan path tersedia
         if (!$file || !$file->isValid()) {
             return back()->withErrors(['file_csv' => 'File gagal diupload. Coba lagi.']);
         }
 
-        // Baca isi file langsung dari konten (lebih aman dari getRealPath)
         $konten = file_get_contents($file->getPathname());
 
         if (empty($konten)) {
             return back()->withErrors(['file_csv' => 'File CSV kosong atau tidak bisa dibaca.']);
         }
 
-        // Pecah per baris
         $baris = array_filter(explode("\n", str_replace("\r\n", "\n", $konten)));
         $baris = array_values($baris);
 
@@ -96,19 +93,43 @@ class AlumniWhitelistController extends Controller
             return back()->withErrors(['file_csv' => 'File CSV tidak memiliki data (hanya header).']);
         }
 
-        // Lewati baris pertama (header)
+        // ✅ FIX: Deteksi separator otomatis (koma atau titik koma)
+        // Excel Indonesia menyimpan CSV dengan ";" bukan ","
+        $headerBaris = $baris[0];
+        $separator = (substr_count($headerBaris, ';') > substr_count($headerBaris, ',')) ? ';' : ',';
+
         array_shift($baris);
 
-        $berhasil = 0;
-        $duplikat = 0;
-        $gagal    = 0;
+        $berhasil   = 0;
+        $duplikat   = 0;
+        $gagal      = 0;
+        $pesanGagal = [];
 
-        foreach ($baris as $b) {
-            $kolom = str_getcsv($b);
+        foreach ($baris as $index => $b) {
+            // ✅ FIX: Gunakan separator yang terdeteksi
+            $kolom = str_getcsv($b, $separator);
 
             if (empty($kolom[0])) continue;
 
-            $nisn = trim($kolom[0]);
+            $raw = trim($kolom[0]);
+
+            // ✅ FIX: Tangani scientific notation dari Excel (misal: 3.03E+09)
+            if (preg_match('/[eE]/', $raw)) {
+                $raw = number_format((float)$raw, 0, '.', '');
+            }
+
+            // ✅ FIX: Hapus karakter non-digit (titik, koma, spasi, dll)
+            $nisn = preg_replace('/[^0-9]/', '', $raw);
+
+            // ✅ FIX: Pad leading zero jadi 10 digit
+            $nisn = str_pad($nisn, 10, '0', STR_PAD_LEFT);
+
+            // ✅ FIX: Validasi harus tepat 10 digit angka
+            if (strlen($nisn) !== 10 || !ctype_digit($nisn)) {
+                $gagal++;
+                $pesanGagal[] = "Baris " . ($index + 2) . ": NISN tidak valid → \"{$kolom[0]}\"";
+                continue;
+            }
 
             if (AlumniWhitelist::where('nisn', $nisn)->exists()) {
                 $duplikat++;
@@ -125,12 +146,13 @@ class AlumniWhitelistController extends Controller
                 $berhasil++;
             } catch (\Exception $e) {
                 $gagal++;
+                $pesanGagal[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
             }
         }
 
-        return back()->with('success',
-            "Import selesai: {$berhasil} NISN ditambahkan, {$duplikat} duplikat dilewati, {$gagal} gagal."
-        );
+        return back()
+            ->with('success', "Import selesai: {$berhasil} NISN ditambahkan, {$duplikat} duplikat dilewati, {$gagal} gagal.")
+            ->with('import_errors', $pesanGagal);
     }
 
     public function resetStatus(AlumniWhitelist $whitelist)

@@ -32,6 +32,28 @@
             <span>{{ session('success') }}</span>
         </div>
     @endif
+
+    {{-- ✅ TAMBAHKAN INI: Detail baris yang gagal diimport --}}
+    @if (session('import_errors') && count(session('import_errors')) > 0)
+        <div class="mb-4 bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl">
+            <div class="flex items-center gap-2 font-semibold mb-2">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Detail baris gagal diimport:</span>
+            </div>
+            <ul class="list-disc list-inside text-sm space-y-1">
+                @foreach (session('import_errors') as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if ($errors->has('delete'))
+        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-start gap-2">
+            <i class="fas fa-exclamation-triangle mt-0.5"></i>
+            <span>{{ $errors->first('delete') }}</span>
+        </div>
+    @endif
     @if ($errors->has('delete'))
         <div class="mb-4 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-start gap-2">
             <i class="fas fa-exclamation-triangle mt-0.5"></i>
