@@ -17,7 +17,7 @@ class Lamaran extends Model
         'file_cv',
         'surat_lamaran',
         'status_lamaran',
-        'catatan_admin', // Tambahkan ini jika belum ada
+        'catatan_admin', 
     ];
 
     public function alumni()
